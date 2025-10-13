@@ -1,0 +1,166 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: test-platform-backend
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    default-property-inclusion: NON_NULL
+
+# Application Configuration
+app:
+  api-prefix: /api
+  allowed-origins: 
+    - http://localhost:3000
+    - http://localhost:3001
+  jwt:
+    secret: test-platform-default-secret-change-in-production
+    expires-in: 24h
+  rate-limit:
+    window-ms: 900000  # 15 minutes
+    max-requests: 100
+  test-generation:
+    max-tests-per-file: 25
+    default-timeout: 30000
+    supported-languages:
+      - java
+      - javascript
+      - typescript
+      - python
+      - csharp
+    test-types:
+      - UNIT
+      - INTEGRATION
+      - E2E
+  llm:
+    provider: local  # openai, anthropic, or local
+    api-key: ${LLM_API_KEY:ollama-local}
+    model: llama3.2:3b  # gpt-4o, gpt-4o-mini, claude-3-5-sonnet, llama3.2:3b, etc.
+    base-url: ${LLM_BASE_URL:http://localhost:11434}
+    max-tokens: 8000
+    temperature: 0.2
+    timeout: 60000
+  git:
+    enabled: true
+    repository-path: ${GIT_REPO_PATH:/Users/vnannuri/Desktop/test}
+  multi-repo:
+    enabled: true
+    default-repository: ${DEFAULT_REPO:repo1}
+    auto-detect-language: true
+    auto-detect-framework: true
+    repositories:
+      # CDAC Project - Remote GitHub Repository (cloned in workspace)
+      - id: cdac-project
+        name: "CDAC Project"
+        remote-url: https://github.com/aqilhussain-mah/Cdac_Project.git
+        path: /Users/vnannuri/Desktop/test/cloned-repos/cdac-project
+        branch: main
+        language: java
+        framework: spring-boot
+        enabled: true
+      
+      # Local Repository Backup (disabled)
+      # - id: cdac-local
+      #   name: "CDAC Project Local"
+      #   path: ${GIT_REPO_PATH:/Users/vnannuri/Desktop/test}
+      #   branch: cdac-main
+      #   language: java
+      #   framework: spring-boot
+      #   enabled: false
+      
+      # Remote Repository Example - Public GitHub Repository
+      # - id: github-public-repo
+      #   name: "Public GitHub Project"
+      #   remote-url: https://github.com/username/repository.git
+      #   path: /tmp/cloned-repos/github-public-repo
+      #   branch: main
+      #   language: java
+      #   framework: spring-boot
+      #   enabled: true
+      
+      # Remote Repository Example - Private GitHub Repository with Credentials
+      # - id: github-private-repo
+      #   name: "Private GitHub Project"
+      #   remote-url: https://github.com/username/private-repo.git
+      #   path: /tmp/cloned-repos/github-private-repo
+      #   branch: main
+      #   language: java
+      #   framework: spring-boot
+      #   enabled: true
+      #   credentials:
+      #     username: ${GITHUB_USERNAME:your-github-username}
+      #     token: ${GITHUB_TOKEN:your-personal-access-token}
+      
+      # Remote Repository Example - GitLab
+      # - id: gitlab-repo
+      #   name: "GitLab Project"
+      #   remote-url: https://gitlab.com/username/repository.git
+      #   path: /tmp/cloned-repos/gitlab-repo
+      #   branch: main
+      #   language: python
+      #   framework: django
+      #   enabled: false
+      #   credentials:
+      #     username: ${GITLAB_USERNAME:your-gitlab-username}
+      #     token: ${GITLAB_TOKEN:your-gitlab-token}
+      
+      - id: repo2
+        name: "Secondary Repository"
+        path: ${GIT_REPO_PATH_2:./other-repo}
+        branch: main
+        language: javascript
+        framework: react
+        enabled: false
+    language-mappings:
+      ".java": java
+      ".js": javascript
+      ".ts": typescript
+      ".py": python
+      ".cs": csharp
+      ".go": go
+      ".rs": rust
+    framework-mappings:
+      "spring-boot": spring-boot
+      "react": react
+      "angular": angular
+      "vue": vue
+      "django": django
+      "flask": flask
+      "dotnet": dotnet
+  mock-data:
+    enabled: false
+    initial-prs: 0
+    initial-tests: 0
+  path-flow:
+    enabled: true
+    max-parallel-tests: 10
+    default-timeout: 30000
+    quality-gates:
+      min-success-rate: 0.8
+      min-test-coverage: 0.7
+      min-service-coverage: 0.8
+    reporting:
+      formats: ["allure", "json", "html"]
+      output-directory: "./reports"
+    orchestration:
+      max-retries: 3
+      retry-delay: 5000
+      parallel-execution: true
+
+logging:
+  level:
+    com.testplatform: INFO
+    org.springframework.web: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
