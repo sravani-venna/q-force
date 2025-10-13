@@ -1,0 +1,145 @@
+Original
+
+{
+  "id": "3f9b42ee-da0e-41a0-9dcd-5c59096cee98",
+  "version": 0,
+  "projectId": "e74c1b9d-16ff-4a29-8c4c-e3147877de1b",
+  "teamId": "f6c0b8cb-de69-495c-980b-2b0e0a6ca288",
+  "title": "new title ssws",
+  "displayId": 0,
+  "cycleNumber": 0,
+  "feedback": "ENABLED",
+  "flowId": "string",
+  "type": "WORK",
+  "state": "string",
+  "activeStatus": "string",
+  "assignmentLeaseExpiry": 60,
+  "judgmentsPerRow": 1,
+  "rowsPerPage": 1,
+  "displayContributorName": true,
+  "judgmentModifiable": true,
+  "sendBackOp": "SEND_BACK_TO_POOL",
+  "copiedFrom": "string",
+  "maxJudgmentPerContributorEnabled": true,
+  "maxJudgmentPerContributor": 0,
+  "maxSkippablePromptNum": 0,
+  "unitSegmentType": "UNIT_ONLY",
+  "internalSecret": "string",
+  "jobCml": {
+    "id": "string",
+    "version": 0,
+    "teamId": "string",
+    "jobId": "string",
+    "instructions": "string",
+    "cml": "string",
+    "js": "string",
+    "css": "string",
+    "validators": [
+      "string"
+    ],
+    "isValid": true,
+    "tags": [
+      "string"
+    ],
+    "editorType": "GRAPHICAL_EDITOR"
+  },
+  "jobCrowd": {
+    "id": "string",
+    "version": 0,
+    "projectId": "string",
+    "jobId": "string",
+    "teamId": "string",
+    "crowdType": [
+      "string"
+    ],
+    "crowdSubType": "string",
+    "channels": [
+      "string"
+    ],
+    "customChannels": [
+      "string"
+    ],
+    "level": 0,
+    "languages": [
+      0
+    ],
+    "countryType": "string",
+    "countries": [
+      "string"
+    ],
+    "containExplicit": true,
+    "curatedCrowd": true
+  },
+  "testQuestionSettings": {
+    "id": "string",
+    "version": 0,
+    "projectId": "string",
+    "jobId": "string",
+    "teamId": "string",
+    "mode": "string",
+    "totalTestQuestionInQuiz": 0,
+    "totalTestQuestionInWork": 0,
+    "testQuestionFrequencyInWorkInPages": 0,
+    "bypassTestInWork": true,
+    "minAccuracyPercentage": 0,
+    "allowContinueWorkingInWork": true
+  },
+  "operateHistoryId": "string",
+  "payRateType": "string",
+  "invoiceStatisticsType": "UNIT_COUNT",
+  "createdAt": "2025-06-30T04:36:51.122Z",
+  "allowSelfQa": true,
+  "allowAbandonUnits": true,
+  "maxNumberOfAllowedAbandonment": 0,
+  "sendAbandonedUnitsBackToJob": true,
+  "instruction": "string",
+  "validationRuleId": "string",
+  "enableBlueTooth": true,
+  "launchPlatform": [
+    "string"
+  ],
+  "latestAppVersion": true,
+  "reusablePrompt": true,
+  "reusablePin": true,
+  "totalSessionNumber": 0,
+  "firstLaunchTime": "2025-06-30T04:36:51.122Z",
+  "promptsEnabling": true,
+  "reviewReasons": "string",
+  "reviewReasonOption": "string",
+  "parentJobId": "string",
+  "unitGroupOption": "string",
+  "appendable": true,
+  "enableShareLink": true,
+  "timeLimitThresholdSec": 0,
+  "enableExternalAutoAssignJob": true,
+  "dynamicJudgements": {
+    "enableDynamicJudgements": true,
+    "maxDynamicJudgements": 0,
+    "mode": "MINIMUM_CONFIDENCE",
+    "minimumConfidence": 0,
+    "matchingJudgements": 0,
+    "enabledQuestions": "string",
+    "id": "string",
+    "version": 0
+  },
+  "enableExpirationTime": 0,
+  "expirationDurationSet": 0,
+  "expirationDurationUpdate": 0,
+  "threshold": 0,
+  "qaAdvancedOptions": {
+    "id": "string",
+    "version": 0,
+    "allowQaToModify": true,
+    "sendBackToOriginalContributorForRework": true,
+    "originalContributorToRespondToFeedback": true,
+    "isQaErrorClassesEnabled": true,
+    "qualityAssuranceClasses": true
+  },
+  "active": true,
+  "running": true,
+  "alias": "string",
+  "appenConnectCrowd": true,
+  "draft": true,
+  "multipleJudgment": true,
+  "segmented": true
+}

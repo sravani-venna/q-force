@@ -1,0 +1,16 @@
+curl --location --request PUT 'https://api.appen.com/v3/jobs/update?teamId=2ac92410-179d-4a6e-b8ec-12bf43b2a78a' \
+--header 'Authorization: Token token=BRqPx_HLxRUd9xYoTey_' \
+--header 'Content-Type: application/json' \
+--header 'Cookie: _session_id=BAh7B0kiHmF1dGhlbnRpY2F0aW9uX3N0cmF0ZWdpZXMGOgZFRjBJIgl1c2Vy%250ABjsARkkiEFVzZXIjNDgwMjc1BjsAVA%253D%253D--176833c622ac0a326dac11848b83cb8b083cd4be' \
+--data '    {
+  "id": "3b965284-ea53-4d27-bd9f-7fc95e40fd87",
+  "projectId": "3d76b46f-b5a8-4604-808d-6c91343c867f",
+  "teamId": "2ac92410-179d-4a6e-b8ec-12bf43b2a78a",
+  "title": "Updated Job 123Title123",
+  "instruction": "Updated instructions",
+  "judgmentsPerRow": 13,
+  "rowsPerPage": 3,
+  "internalSecret": "reJTRfHQG5SUNPOExHFQkU5fmNAz501dlAYLDRHIFX0iuZ",
+  "type": "QA",
+  "state": "PAUSED"
+}'
