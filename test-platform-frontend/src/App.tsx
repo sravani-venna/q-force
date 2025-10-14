@@ -13,7 +13,6 @@ import TestGeneration from './pages/TestGeneration/TestGeneration';
 import TestExecution from './pages/TestExecution/TestExecution';
 import Reports from './pages/Reports/Reports';
 import Settings from './pages/Settings/Settings';
-import PullRequests from './pages/PullRequests/PullRequests';
 import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
 
@@ -137,7 +136,6 @@ const AppRoutes: React.FC = () => {
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="test-generation" element={<TestGeneration />} />
         <Route path="test-execution" element={<TestExecution />} />
-        <Route path="pull-requests" element={<PullRequests />} />
         <Route path="reports" element={<Reports />} />
         <Route path="settings" element={<Settings />} />
       </Route>

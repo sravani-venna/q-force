@@ -54,6 +54,12 @@ public class TestGenerationService {
             generateTestsForSpringBootFile("repository/UsersRepository.java", "UsersRepository", TestType.INTEGRATION);
             generateTestsForSpringBootFile("repository/BookingRepository.java", "BookingRepository", TestType.INTEGRATION);
             
+            // Generate test cases for Kepler App services - UNIT and INTEGRATION tests
+            generateTestsForSpringBootFile("project-service/ProjectService.java", "ProjectService", TestType.UNIT);
+            generateTestsForSpringBootFile("project-service/ProjectService.java", "ProjectService", TestType.INTEGRATION);
+            generateTestsForSpringBootFile("contributor-service/ContributorService.java", "ContributorService", TestType.UNIT);
+            generateTestsForSpringBootFile("contributor-service/ContributorService.java", "ContributorService", TestType.INTEGRATION);
+            
             logger.info("✅ Generated {} real test suites from Spring Boot code", generatedTests.size());
         } catch (Exception e) {
             logger.error("❌ Error initializing real test generation: {}", e.getMessage());
@@ -69,6 +75,7 @@ public class TestGenerationService {
             // For now, create a placeholder that indicates real code analysis
             TestSuite realSuite = createTestSuite(1, "cdac-main", filePath, testType, "java");
             realSuite.setId(String.valueOf(nextTestId++));
+            realSuite.setName(className + " " + testType.name() + " Tests");
             
             // Create test cases that are specific to the Spring Boot code
             List<TestCase> realTests = createRealSpringBootTestCases(className, testType);
@@ -107,6 +114,31 @@ public class TestGenerationService {
         } else if (className.equals("BookingRepository")) {
             tests.add(createTestCase("Test booking repository queries", testType, TestPriority.HIGH, "Tests booking repository query methods"));
             tests.add(createTestCase("Test booking date range queries", testType, TestPriority.MEDIUM, "Tests date range queries in booking repository"));
+        } else if (className.equals("ProjectService")) {
+            if (testType == TestType.UNIT) {
+                tests.add(createTestCase("Test project creation", testType, TestPriority.HIGH, "Tests project creation in ProjectService"));
+                tests.add(createTestCase("Test project retrieval", testType, TestPriority.HIGH, "Tests project retrieval methods"));
+                tests.add(createTestCase("Test project update", testType, TestPriority.HIGH, "Tests project update operations"));
+                tests.add(createTestCase("Test project deletion", testType, TestPriority.MEDIUM, "Tests project deletion functionality"));
+                tests.add(createTestCase("Test project validation", testType, TestPriority.HIGH, "Tests project data validation"));
+            } else if (testType == TestType.INTEGRATION) {
+                tests.add(createTestCase("Test project repository integration", testType, TestPriority.HIGH, "Tests project repository CRUD operations"));
+                tests.add(createTestCase("Test project with database transactions", testType, TestPriority.HIGH, "Tests project transactions and rollback"));
+                tests.add(createTestCase("Test project search and filtering", testType, TestPriority.MEDIUM, "Tests project search queries with filters"));
+                tests.add(createTestCase("Test project association with contributors", testType, TestPriority.HIGH, "Tests project-contributor relationships"));
+            }
+        } else if (className.equals("ContributorService")) {
+            if (testType == TestType.UNIT) {
+                tests.add(createTestCase("Test contributor assignment", testType, TestPriority.HIGH, "Tests contributor job assignment"));
+                tests.add(createTestCase("Test contributor unassignment", testType, TestPriority.HIGH, "Tests contributor job unassignment"));
+                tests.add(createTestCase("Test contributor creation", testType, TestPriority.HIGH, "Tests contributor creation"));
+                tests.add(createTestCase("Test contributor stats update", testType, TestPriority.MEDIUM, "Tests batch contributor stats update"));
+            } else if (testType == TestType.INTEGRATION) {
+                tests.add(createTestCase("Test contributor database operations", testType, TestPriority.HIGH, "Tests contributor repository integration"));
+                tests.add(createTestCase("Test contributor metrics calculation", testType, TestPriority.HIGH, "Tests contributor performance metrics"));
+                tests.add(createTestCase("Test contributor job queue processing", testType, TestPriority.MEDIUM, "Tests job queue integration with contributors"));
+                tests.add(createTestCase("Test contributor bulk operations", testType, TestPriority.HIGH, "Tests batch contributor updates and assignments"));
+            }
         }
         
         return tests;
@@ -197,10 +229,23 @@ public class TestGenerationService {
     }
     
     /**
-     * Get all generated tests
+     * Get all generated tests - Filtered for Kepler-app services only
      */
     public List<TestSuite> getAllTests() {
-        return new ArrayList<>(generatedTests);
+        // Filter to show only Kepler-app services (ProjectService and ContributorService)
+        List<TestSuite> filtered = generatedTests.stream()
+                .filter(test -> {
+                    String filePath = test.getFilePath() != null ? test.getFilePath().toLowerCase() : "";
+                    String name = test.getName() != null ? test.getName().toLowerCase() : "";
+                    return filePath.contains("projectservice") || filePath.contains("project-service") ||
+                           filePath.contains("contributorservice") || filePath.contains("contributor-service") ||
+                           name.contains("projectservice") || name.contains("contributorservice");
+                })
+                .collect(Collectors.toList());
+        
+        logger.info("📊 Filtered tests - Total in memory: {}, Kepler-app only: {}", 
+                   generatedTests.size(), filtered.size());
+        return filtered;
     }
     
     /**

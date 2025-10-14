@@ -29,7 +29,6 @@ import {
   Notifications as NotificationsIcon,
   AccountCircle as AccountCircleIcon,
   Logout as LogoutIcon,
-  MergeType as MergeTypeIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -59,12 +58,6 @@ const navigationItems: NavigationItem[] = [
     icon: <PlayArrowIcon />,
     path: '/test-execution',
     permission: 'EXECUTE_TESTS',
-  },
-  {
-    text: 'Pull Requests',
-    icon: <MergeTypeIcon />,
-    path: '/pull-requests',
-    permission: 'VIEW_PRS',
   },
   {
     text: 'Reports',

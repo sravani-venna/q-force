@@ -51,12 +51,12 @@ app:
     auto-detect-language: true
     auto-detect-framework: true
     repositories:
-      # CDAC Project - Remote GitHub Repository (cloned in workspace)
-      - id: cdac-project
-        name: "CDAC Project"
-        remote-url: https://github.com/aqilhussain-mah/Cdac_Project.git
-        path: /Users/vnannuri/Desktop/test/cloned-repos/cdac-project
-        branch: main
+      # Kepler App - Local Repository with Git Remote
+      - id: kepler-app
+        name: "Kepler App"
+        remote-url: git@github.com:Appen-International/kepler-app.git
+        path: /Users/smamidala/Desktop/kepler-app
+        branch: release
         language: java
         framework: spring-boot
         enabled: true
