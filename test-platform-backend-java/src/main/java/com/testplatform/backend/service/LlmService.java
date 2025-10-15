@@ -114,6 +114,28 @@ public class LlmService {
                 prompt.append("- Error recovery and user experience\n");
                 prompt.append("- Data persistence across sessions\n");
                 break;
+            case PERFORMANCE:
+                prompt.append("- Load testing and stress testing\n");
+                prompt.append("- Response time validation\n");
+                prompt.append("- Throughput and capacity testing\n");
+                prompt.append("- Memory usage and optimization\n");
+                prompt.append("- CPU utilization monitoring\n");
+                prompt.append("- Database query performance\n");
+                prompt.append("- Network latency testing\n");
+                prompt.append("- Resource leak detection\n");
+                prompt.append("- Scalability and concurrency testing\n");
+                break;
+            case SECURITY:
+                prompt.append("- Authentication and authorization\n");
+                prompt.append("- Input validation and sanitization\n");
+                prompt.append("- SQL injection prevention\n");
+                prompt.append("- Cross-site scripting (XSS) protection\n");
+                prompt.append("- CSRF token validation\n");
+                prompt.append("- Data encryption and secure storage\n");
+                prompt.append("- Session management security\n");
+                prompt.append("- API security and rate limiting\n");
+                prompt.append("- Vulnerability scanning and penetration testing\n");
+                break;
         }
         
         prompt.append("\nIMPORTANT: Respond with ONLY a valid JSON object. No markdown, no backticks, no additional text.\n");
@@ -183,6 +205,28 @@ public class LlmService {
                 prompt.append("- Performance under load\n");
                 prompt.append("- Error recovery and user experience\n");
                 break;
+            case PERFORMANCE:
+                prompt.append("- Load testing and stress testing\n");
+                prompt.append("- Response time validation\n");
+                prompt.append("- Throughput and capacity testing\n");
+                prompt.append("- Memory usage and optimization\n");
+                prompt.append("- CPU utilization monitoring\n");
+                prompt.append("- Database query performance\n");
+                prompt.append("- Network latency testing\n");
+                prompt.append("- Resource leak detection\n");
+                prompt.append("- Scalability and concurrency testing\n");
+                break;
+            case SECURITY:
+                prompt.append("- Authentication and authorization\n");
+                prompt.append("- Input validation and sanitization\n");
+                prompt.append("- SQL injection prevention\n");
+                prompt.append("- Cross-site scripting (XSS) protection\n");
+                prompt.append("- CSRF token validation\n");
+                prompt.append("- Data encryption and secure storage\n");
+                prompt.append("- Session management security\n");
+                prompt.append("- API security and rate limiting\n");
+                prompt.append("- Vulnerability scanning and penetration testing\n");
+                break;
         }
         
         prompt.append("\nIMPORTANT: Respond with ONLY a valid JSON object. No markdown, no backticks, no additional text.\n");
@@ -203,7 +247,7 @@ public class LlmService {
     }
     
     /**
-     * Call the LLM API
+     * Call the local LLM API (Ollama or similar)
      */
     private String callLlmApi(String prompt) {
         try {
@@ -229,14 +273,18 @@ public class LlmService {
             
             if (response.getStatusCode() == HttpStatus.OK) {
                 JsonNode responseJson = objectMapper.readTree(response.getBody());
-                return responseJson.get("response").asText();
+                JsonNode responseNode = responseJson.get("response");
+                if (responseNode != null) {
+                    return responseNode.asText();
+                }
+                throw new RuntimeException("No valid response from local LLM API");
             } else {
-                throw new RuntimeException("LLM API call failed with status: " + response.getStatusCode());
+                throw new RuntimeException("Local LLM API call failed with status: " + response.getStatusCode());
             }
             
         } catch (Exception e) {
-            logger.error("❌ Error calling LLM API: {}", e.getMessage(), e);
-            throw new RuntimeException("Failed to call LLM API", e);
+            logger.error("❌ Error calling local LLM API: {}", e.getMessage(), e);
+            return "Error: Failed to call local LLM API - " + e.getMessage();
         }
     }
     

@@ -372,149 +372,147 @@ public class UnifiedReportingService {
      * Get HTML styles
      */
     private String getHtmlStyles() {
-        return """
-            body {
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                margin: 0;
-                padding: 20px;
-                background-color: #f5f5f5;
-            }
-            .header {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-                padding: 30px;
-                border-radius: 10px;
-                margin-bottom: 30px;
-            }
-            .header h1 {
-                margin: 0 0 10px 0;
-                font-size: 2.5em;
-            }
-            .path-flow {
-                font-size: 1.2em;
-                margin: 10px 0;
-            }
-            .timestamp {
-                opacity: 0.8;
-                margin: 5px 0 0 0;
-            }
-            .summary {
-                background: white;
-                padding: 30px;
-                border-radius: 10px;
-                margin-bottom: 30px;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            }
-            .metrics {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 20px;
-                margin-top: 20px;
-            }
-            .metric {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                padding: 20px;
-                background: #f8f9fa;
-                border-radius: 8px;
-            }
-            .metric .label {
-                font-size: 0.9em;
-                color: #666;
-                margin-bottom: 5px;
-            }
-            .metric .value {
-                font-size: 2em;
-                font-weight: bold;
-                color: #333;
-            }
-            .metric .value.passed {
-                color: #28a745;
-            }
-            .services {
-                background: white;
-                padding: 30px;
-                border-radius: 10px;
-                margin-bottom: 30px;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            }
-            .service {
-                border: 1px solid #e9ecef;
-                border-radius: 8px;
-                padding: 20px;
-                margin-bottom: 20px;
-            }
-            .service h3 {
-                margin: 0 0 10px 0;
-                color: #333;
-            }
-            .service-info {
-                margin-bottom: 15px;
-            }
-            .service-info span {
-                background: #e9ecef;
-                padding: 4px 8px;
-                border-radius: 4px;
-                margin-right: 10px;
-                font-size: 0.9em;
-            }
-            .service-metrics {
-                display: flex;
-                gap: 20px;
-            }
-            .service-metrics span {
-                font-weight: 500;
-            }
-            .quality-gates {
-                background: white;
-                padding: 30px;
-                border-radius: 10px;
-                margin-bottom: 30px;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            }
-            .quality-gate {
-                display: flex;
-                align-items: center;
-                padding: 15px;
-                border-radius: 8px;
-                margin-bottom: 10px;
-            }
-            .quality-gate.passed {
-                background: #d4edda;
-                border-left: 4px solid #28a745;
-            }
-            .quality-gate.failed {
-                background: #f8d7da;
-                border-left: 4px solid #dc3545;
-            }
-            .quality-gate .status {
-                font-size: 1.2em;
-                margin-right: 15px;
-            }
-            .quality-gate .name {
-                font-weight: bold;
-                margin-right: 15px;
-            }
-            .recommendations {
-                background: white;
-                padding: 30px;
-                border-radius: 10px;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            }
-            .recommendations ul {
-                list-style: none;
-                padding: 0;
-            }
-            .recommendations li {
-                padding: 10px 0;
-                border-bottom: 1px solid #e9ecef;
-            }
-            .recommendations li:before {
-                content: "💡 ";
-                margin-right: 10px;
-            }
-            """;
+        return "            body {" +
+    "                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;" +
+    "                margin: 0;" +
+    "                padding: 20px;" +
+    "                background-color: #f5f5f5;" +
+    "            }" +
+    "            .header {" +
+    "                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" +
+    "                color: white;" +
+    "                padding: 30px;" +
+    "                border-radius: 10px;" +
+    "                margin-bottom: 30px;" +
+    "            }" +
+    "            .header h1 {" +
+    "                margin: 0 0 10px 0;" +
+    "                font-size: 2.5em;" +
+    "            }" +
+    "            .path-flow {" +
+    "                font-size: 1.2em;" +
+    "                margin: 10px 0;" +
+    "            }" +
+    "            .timestamp {" +
+    "                opacity: 0.8;" +
+    "                margin: 5px 0 0 0;" +
+    "            }" +
+    "            .summary {" +
+    "                background: white;" +
+    "                padding: 30px;" +
+    "                border-radius: 10px;" +
+    "                margin-bottom: 30px;" +
+    "                box-shadow: 0 2px 10px rgba(0,0,0,0.1);" +
+    "            }" +
+    "            .metrics {" +
+    "                display: grid;" +
+    "                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));" +
+    "                gap: 20px;" +
+    "                margin-top: 20px;" +
+    "            }" +
+    "            .metric {" +
+    "                display: flex;" +
+    "                flex-direction: column;" +
+    "                align-items: center;" +
+    "                padding: 20px;" +
+    "                background: #f8f9fa;" +
+    "                border-radius: 8px;" +
+    "            }" +
+    "            .metric .label {" +
+    "                font-size: 0.9em;" +
+    "                color: #666;" +
+    "                margin-bottom: 5px;" +
+    "            }" +
+    "            .metric .value {" +
+    "                font-size: 2em;" +
+    "                font-weight: bold;" +
+    "                color: #333;" +
+    "            }" +
+    "            .metric .value.passed {" +
+    "                color: #28a745;" +
+    "            }" +
+    "            .services {" +
+    "                background: white;" +
+    "                padding: 30px;" +
+    "                border-radius: 10px;" +
+    "                margin-bottom: 30px;" +
+    "                box-shadow: 0 2px 10px rgba(0,0,0,0.1);" +
+    "            }" +
+    "            .service {" +
+    "                border: 1px solid #e9ecef;" +
+    "                border-radius: 8px;" +
+    "                padding: 20px;" +
+    "                margin-bottom: 20px;" +
+    "            }" +
+    "            .service h3 {" +
+    "                margin: 0 0 10px 0;" +
+    "                color: #333;" +
+    "            }" +
+    "            .service-info {" +
+    "                margin-bottom: 15px;" +
+    "            }" +
+    "            .service-info span {" +
+    "                background: #e9ecef;" +
+    "                padding: 4px 8px;" +
+    "                border-radius: 4px;" +
+    "                margin-right: 10px;" +
+    "                font-size: 0.9em;" +
+    "            }" +
+    "            .service-metrics {" +
+    "                display: flex;" +
+    "                gap: 20px;" +
+    "            }" +
+    "            .service-metrics span {" +
+    "                font-weight: 500;" +
+    "            }" +
+    "            .quality-gates {" +
+    "                background: white;" +
+    "                padding: 30px;" +
+    "                border-radius: 10px;" +
+    "                margin-bottom: 30px;" +
+    "                box-shadow: 0 2px 10px rgba(0,0,0,0.1);" +
+    "            }" +
+    "            .quality-gate {" +
+    "                display: flex;" +
+    "                align-items: center;" +
+    "                padding: 15px;" +
+    "                border-radius: 8px;" +
+    "                margin-bottom: 10px;" +
+    "            }" +
+    "            .quality-gate.passed {" +
+    "                background: #d4edda;" +
+    "                border-left: 4px solid #28a745;" +
+    "            }" +
+    "            .quality-gate.failed {" +
+    "                background: #f8d7da;" +
+    "                border-left: 4px solid #dc3545;" +
+    "            }" +
+    "            .quality-gate .status {" +
+    "                font-size: 1.2em;" +
+    "                margin-right: 15px;" +
+    "            }" +
+    "            .quality-gate .name {" +
+    "                font-weight: bold;" +
+    "                margin-right: 15px;" +
+    "            }" +
+    "            .recommendations {" +
+    "                background: white;" +
+    "                padding: 30px;" +
+    "                border-radius: 10px;" +
+    "                box-shadow: 0 2px 10px rgba(0,0,0,0.1);" +
+    "            }" +
+    "            .recommendations ul {" +
+    "                list-style: none;" +
+    "                padding: 0;" +
+    "            }" +
+    "            .recommendations li {" +
+    "                padding: 10px 0;" +
+    "                border-bottom: 1px solid #e9ecef;" +
+    "            }" +
+    "            .recommendations li:before {" +
+            "                content: \"💡\";" +
+    "                margin-right: 10px;" +
+    "            }";
     }
     
     /**

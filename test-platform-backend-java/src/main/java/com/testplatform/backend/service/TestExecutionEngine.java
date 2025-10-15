@@ -377,22 +377,21 @@ public class TestExecutionEngine {
      * Generate Java test content
      */
     private String generateJavaTestContent(String framework, TestCase testCase) {
-        return String.format("""
-            package com.testplatform.generated;
-            
-            import org.junit.jupiter.api.Test;
-            import org.junit.jupiter.api.BeforeEach;
-            import static org.junit.jupiter.api.Assertions.*;
-            
-            public class %sTest {
-                
-                @Test
-                public void %s() {
-                    // %s
-                    %s
-                }
-            }
-            """, 
+        return String.format(
+    "            package com.testplatform.generated;" +
+    "            " +
+    "            import org.junit.jupiter.api.Test;" +
+    "            import org.junit.jupiter.api.BeforeEach;" +
+    "            import static org.junit.jupiter.api.Assertions.*;" +
+    "            " +
+    "            public class %sTest {" +
+    "                " +
+    "                @Test" +
+    "                public void %s() {" +
+    "                    // %s" +
+    "                    %s" +
+    "                }" +
+    "            }", 
             testCase.getName().replaceAll("[^a-zA-Z0-9]", ""),
             testCase.getName().replaceAll("[^a-zA-Z0-9]", ""),
             testCase.getDescription(),
@@ -404,12 +403,11 @@ public class TestExecutionEngine {
      * Generate JavaScript test content
      */
     private String generateJavaScriptTestContent(String framework, TestCase testCase) {
-        return String.format("""
-            // %s
-            test('%s', () => {
-                %s
-            });
-            """, 
+        return String.format(
+    "            // %s" +
+    "            test('%s', () => {" +
+    "                %s" +
+    "            });", 
             testCase.getDescription(),
             testCase.getName(),
             testCase.getCode()
@@ -420,15 +418,14 @@ public class TestExecutionEngine {
      * Generate Python test content
      */
     private String generatePythonTestContent(String framework, TestCase testCase) {
-        return String.format("""
-            import unittest
-            
-            class %sTest(unittest.TestCase):
-                
-                def test_%s(self):
-                    \"\"\"%s\"\"\"
-                    %s
-            """, 
+        return String.format(
+    "            import unittest" +
+    "            " +
+    "            class %sTest(unittest.TestCase):" +
+    "                " +
+    "                def test_%s(self):" +
+    "                    \"\"\"%s\"\"\"" +
+    "                    %s", 
             testCase.getName().replaceAll("[^a-zA-Z0-9]", ""),
             testCase.getName().replaceAll("[^a-zA-Z0-9]", "_"),
             testCase.getDescription(),
@@ -440,19 +437,18 @@ public class TestExecutionEngine {
      * Generate C# test content
      */
     private String generateCSharpTestContent(String framework, TestCase testCase) {
-        return String.format("""
-            using NUnit.Framework;
-            
-            [TestFixture]
-            public class %sTest {
-                
-                [Test]
-                public void %s() {
-                    // %s
-                    %s
-                }
-            }
-            """, 
+        return String.format(
+    "            using NUnit.Framework;" +
+    "            " +
+    "            [TestFixture]" +
+    "            public class %sTest {" +
+    "                " +
+    "                [Test]" +
+    "                public void %s() {" +
+    "                    // %s" +
+    "                    %s" +
+    "                }" +
+    "            }", 
             testCase.getName().replaceAll("[^a-zA-Z0-9]", ""),
             testCase.getName().replaceAll("[^a-zA-Z0-9]", ""),
             testCase.getDescription(),
@@ -464,16 +460,15 @@ public class TestExecutionEngine {
      * Generate Go test content
      */
     private String generateGoTestContent(String framework, TestCase testCase) {
-        return String.format("""
-            package main
-            
-            import "testing"
-            
-            func Test%s(t *testing.T) {
-                // %s
-                %s
-            }
-            """, 
+        return String.format(
+            "package main\n" +
+            "\n" +
+            "import \"testing\"\n" +
+            "\n" +
+            "func Test%s(t *testing.T) {\n" +
+            "    // %s\n" +
+            "    %s\n" +
+            "}", 
             testCase.getName().replaceAll("[^a-zA-Z0-9]", ""),
             testCase.getDescription(),
             testCase.getCode()
@@ -484,18 +479,17 @@ public class TestExecutionEngine {
      * Generate Rust test content
      */
     private String generateRustTestContent(String framework, TestCase testCase) {
-        return String.format("""
-            #[cfg(test)]
-            mod tests {
-                use super::*;
-                
-                #[test]
-                fn test_%s() {
-                    // %s
-                    %s
-                }
-            }
-            """, 
+        return String.format(
+    "            #[cfg(test)]" +
+    "            mod tests {" +
+    "                use super::*;" +
+    "                " +
+    "                #[test]" +
+    "                fn test_%s() {" +
+    "                    // %s" +
+    "                    %s" +
+    "                }" +
+    "            }", 
             testCase.getName().replaceAll("[^a-zA-Z0-9]", "_"),
             testCase.getDescription(),
             testCase.getCode()
@@ -506,12 +500,11 @@ public class TestExecutionEngine {
      * Generate generic test content
      */
     private String generateGenericTestContent(TestCase testCase) {
-        return String.format("""
-            // %s
-            // %s
-            
-            %s
-            """, 
+        return String.format(
+    "            // %s" +
+    "            // %s" +
+    "            " +
+    "            %s", 
             testCase.getName(),
             testCase.getDescription(),
             testCase.getCode()

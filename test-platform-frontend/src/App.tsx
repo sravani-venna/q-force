@@ -11,6 +11,7 @@ import Layout from './components/Layout/Layout';
 import Dashboard from './pages/Dashboard/Dashboard';
 import TestGeneration from './pages/TestGeneration/TestGeneration';
 import TestExecution from './pages/TestExecution/TestExecution';
+import AIReview from './pages/AIReview/AIReview';
 import Reports from './pages/Reports/Reports';
 import Settings from './pages/Settings/Settings';
 import Login from './pages/Auth/Login';
@@ -136,6 +137,7 @@ const AppRoutes: React.FC = () => {
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="test-generation" element={<TestGeneration />} />
         <Route path="test-execution" element={<TestExecution />} />
+        <Route path="ai-review" element={<AIReview />} />
         <Route path="reports" element={<Reports />} />
         <Route path="settings" element={<Settings />} />
       </Route>

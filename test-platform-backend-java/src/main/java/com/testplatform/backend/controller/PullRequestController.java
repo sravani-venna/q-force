@@ -12,7 +12,7 @@ import com.testplatform.backend.service.TestExecutionService;
 import com.testplatform.backend.service.GitService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import jakarta.validation.Valid;
+import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
