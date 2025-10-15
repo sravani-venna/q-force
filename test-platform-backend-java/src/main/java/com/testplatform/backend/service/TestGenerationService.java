@@ -59,6 +59,8 @@ public class TestGenerationService {
             generateTestsForSpringBootFile("project-service/ProjectService.java", "ProjectService", TestType.INTEGRATION);
             generateTestsForSpringBootFile("contributor-service/ContributorService.java", "ContributorService", TestType.UNIT);
             generateTestsForSpringBootFile("contributor-service/ContributorService.java", "ContributorService", TestType.INTEGRATION);
+            generateTestsForSpringBootFile("work-service/WorkService.java", "WorkService", TestType.UNIT);
+            generateTestsForSpringBootFile("work-service/WorkService.java", "WorkService", TestType.INTEGRATION);
             
             logger.info("✅ Generated {} real test suites from Spring Boot code", generatedTests.size());
         } catch (Exception e) {
@@ -138,6 +140,19 @@ public class TestGenerationService {
                 tests.add(createTestCase("Test contributor metrics calculation", testType, TestPriority.HIGH, "Tests contributor performance metrics"));
                 tests.add(createTestCase("Test contributor job queue processing", testType, TestPriority.MEDIUM, "Tests job queue integration with contributors"));
                 tests.add(createTestCase("Test contributor bulk operations", testType, TestPriority.HIGH, "Tests batch contributor updates and assignments"));
+            }
+        } else if (className.equals("WorkService")) {
+            if (testType == TestType.UNIT) {
+                tests.add(createTestCase("Test work item creation", testType, TestPriority.HIGH, "Tests work item creation in WorkService"));
+                tests.add(createTestCase("Test work item retrieval", testType, TestPriority.HIGH, "Tests work item retrieval methods"));
+                tests.add(createTestCase("Test work item update", testType, TestPriority.HIGH, "Tests work item update operations"));
+                tests.add(createTestCase("Test work item assignment", testType, TestPriority.HIGH, "Tests work item assignment to contributors"));
+                tests.add(createTestCase("Test work item validation", testType, TestPriority.MEDIUM, "Tests work item data validation"));
+            } else if (testType == TestType.INTEGRATION) {
+                tests.add(createTestCase("Test work repository integration", testType, TestPriority.HIGH, "Tests work repository CRUD operations"));
+                tests.add(createTestCase("Test work with database transactions", testType, TestPriority.HIGH, "Tests work transactions and rollback"));
+                tests.add(createTestCase("Test work search and filtering", testType, TestPriority.MEDIUM, "Tests work search queries with filters"));
+                tests.add(createTestCase("Test work status transitions", testType, TestPriority.HIGH, "Tests work status lifecycle management"));
             }
         }
         
@@ -232,14 +247,15 @@ public class TestGenerationService {
      * Get all generated tests - Filtered for Kepler-app services only
      */
     public List<TestSuite> getAllTests() {
-        // Filter to show only Kepler-app services (ProjectService and ContributorService)
+        // Filter to show only Kepler-app services (ProjectService, ContributorService, and WorkService)
         List<TestSuite> filtered = generatedTests.stream()
                 .filter(test -> {
                     String filePath = test.getFilePath() != null ? test.getFilePath().toLowerCase() : "";
                     String name = test.getName() != null ? test.getName().toLowerCase() : "";
                     return filePath.contains("projectservice") || filePath.contains("project-service") ||
                            filePath.contains("contributorservice") || filePath.contains("contributor-service") ||
-                           name.contains("projectservice") || name.contains("contributorservice");
+                           filePath.contains("workservice") || filePath.contains("work-service") ||
+                           name.contains("projectservice") || name.contains("contributorservice") || name.contains("workservice");
                 })
                 .collect(Collectors.toList());
         
