@@ -458,20 +458,19 @@ public class PathFlowAnalysisService {
     }
     
     private String generateJavaTestCode(String framework, String responsibility) {
-        return String.format("""
-            @Test
-            public void test%s() {
-                // Test %s functionality
-                // Given
-                %s
-                
-                // When
-                %s
-                
-                // Then
-                %s
-            }
-            """, 
+        return String.format(
+            "@Test\n" +
+            "public void test%s() {\n" +
+            "    // Test %s functionality\n" +
+            "    // Given\n" +
+            "    %s\n" +
+            "    \n" +
+            "    // When\n" +
+            "    %s\n" +
+            "    \n" +
+            "    // Then\n" +
+            "    %s\n" +
+            "}", 
             responsibility.replaceAll("\\s+", ""),
             responsibility,
             "// Setup test data",
@@ -481,19 +480,18 @@ public class PathFlowAnalysisService {
     }
     
     private String generateRubyTestCode(String framework, String responsibility) {
-        return String.format("""
-            it 'should %s' do
-              # Test %s functionality
-              # Given
-              %s
-              
-              # When
-              %s
-              
-              # Then
-              %s
-            end
-            """, 
+        return String.format(
+    "            it 'should %s' do" +
+    "              # Test %s functionality" +
+    "              # Given" +
+    "              %s" +
+    "              " +
+    "              # When" +
+    "              %s" +
+    "              " +
+    "              # Then" +
+    "              %s" +
+    "            end", 
             responsibility,
             responsibility,
             "# Setup test data",
@@ -503,18 +501,17 @@ public class PathFlowAnalysisService {
     }
     
     private String generatePythonTestCode(String framework, String responsibility) {
-        return String.format("""
-            def test_%s(self):
-                \"\"\"Test %s functionality\"\"\"
-                # Given
-                %s
-                
-                # When
-                %s
-                
-                # Then
-                %s
-            """, 
+        return String.format(
+    "            def test_%s(self):" +
+    "                \"\"\"Test %s functionality\"\"\"" +
+    "                # Given" +
+    "                %s" +
+    "                " +
+    "                # When" +
+    "                %s" +
+    "                " +
+    "                # Then" +
+    "                %s", 
             responsibility.replaceAll("\\s+", "_"),
             responsibility,
             "# Setup test data",
@@ -524,95 +521,86 @@ public class PathFlowAnalysisService {
     }
     
     private String generateIntegrationTestCode(String language, String framework, String serviceName, PathFlowComponents components) {
-        return String.format("""
-            @Test
-            public void test%sIntegration() {
-                // Integration test for %s
-                // Test cross-service communication
-                // Verify data flow between services
-            }
-            """, 
+        return String.format(
+    "            @Test" +
+    "            public void test%sIntegration() {" +
+    "                // Integration test for %s" +
+    "                // Test cross-service communication" +
+    "                // Verify data flow between services" +
+    "            }", 
             serviceName,
             serviceName
         );
     }
     
     private String generateApiTestCode(String endpoint, PathFlowComponents components) {
-        return String.format("""
-            @Test
-            public void testApi%s() {
-                // API integration test for %s
-                // Test endpoint functionality
-                // Verify response format and status codes
-            }
-            """, 
+        return String.format(
+    "            @Test" +
+    "            public void testApi%s() {" +
+    "                // API integration test for %s" +
+    "                // Test endpoint functionality" +
+    "                // Verify response format and status codes" +
+    "            }", 
             endpoint.replaceAll("[^a-zA-Z0-9]", ""),
             endpoint
         );
     }
     
     private String generateDatabaseTestCode(String dbOp, PathFlowComponents components) {
-        return String.format("""
-            @Test
-            public void testDatabase%s() {
-                // Database integration test for %s
-                // Test database operations
-                // Verify data consistency
-            }
-            """, 
+        return String.format(
+    "            @Test" +
+    "            public void testDatabase%s() {" +
+    "                // Database integration test for %s" +
+    "                // Test database operations" +
+    "                // Verify data consistency" +
+    "            }", 
             dbOp.replaceAll("[^a-zA-Z0-9]", ""),
             dbOp
         );
     }
     
     private String generateExternalServiceTestCode(String externalService, PathFlowComponents components) {
-        return String.format("""
-            @Test
-            public void testExternal%s() {
-                // External service integration test for %s
-                // Test service communication
-                // Verify error handling and timeouts
-            }
-            """, 
+        return String.format(
+    "            @Test" +
+    "            public void testExternal%s() {" +
+    "                // External service integration test for %s" +
+    "                // Test service communication" +
+    "                // Verify error handling and timeouts" +
+    "            }", 
             externalService,
             externalService
         );
     }
     
     private String generateHappyPathTestCode(PathFlowComponents components) {
-        return """
-            @Test
-            public void testHappyPathFlow() {
-                // End-to-end happy path test
-                // Test complete user journey
-                // Verify all services work together
-            }
-            """;
+        return "            @Test" +
+    "            public void testHappyPathFlow() {" +
+    "                // End-to-end happy path test" +
+    "                // Test complete user journey" +
+    "                // Verify all services work together" +
+    "            }";
     }
     
     private String generateErrorPathTestCode(String edgeCase, PathFlowComponents components) {
-        return String.format("""
-            @Test
-            public void testErrorPath%s() {
-                // Error path test for %s
-                // Test error handling and recovery
-                // Verify appropriate error responses
-            }
-            """, 
+        return String.format(
+    "            @Test" +
+    "            public void testErrorPath%s() {" +
+    "                // Error path test for %s" +
+    "                // Test error handling and recovery" +
+    "                // Verify appropriate error responses" +
+    "            }", 
             edgeCase.replaceAll("[^a-zA-Z0-9]", ""),
             edgeCase
         );
     }
     
     private String generatePerformanceTestCode(PathFlowComponents components) {
-        return """
-            @Test
-            public void testPathFlowPerformance() {
-                // Performance test for path flow
-                // Test response times and throughput
-                // Verify performance requirements
-            }
-            """;
+        return "            @Test" +
+    "            public void testPathFlowPerformance() {" +
+    "                // Performance test for path flow" +
+    "                // Test response times and throughput" +
+    "                // Verify performance requirements" +
+    "            }";
     }
     
     private double calculateTestCoverage(List<ServiceAnalysis> serviceAnalyses) {
@@ -849,22 +837,21 @@ public class PathFlowAnalysisService {
         test.setPriority(TestPriority.MEDIUM);
         test.setDescription("Unit test for " + componentName + " component in " + serviceName);
         test.setLanguage("javascript");
-        test.setCode(String.format("""
-            import { render, screen } from '@testing-library/react';
-            import %s from './%s';
-            
-            describe('%s Component', () => {
-                test('renders without crashing', () => {
-                    render(<%s />);
-                    expect(screen.getByTestId('%s')).toBeInTheDocument();
-                });
-                
-                test('handles user interactions', () => {
-                    render(<%s />);
-                    // Add interaction tests based on real component code
-                });
-            });
-            """, componentName, componentName, componentName, componentName, componentName.toLowerCase(), componentName));
+        test.setCode(String.format(
+    "            import { render, screen } from '@testing-library/react';" +
+    "            import %s from './%s';" +
+    "            " +
+    "            describe('%s Component', () => {" +
+    "                test('renders without crashing', () => {" +
+    "                    render(<%s />);" +
+    "                    expect(screen.getByTestId('%s')).toBeInTheDocument();" +
+    "                });" +
+    "                " +
+    "                test('handles user interactions', () => {" +
+    "                    render(<%s />);" +
+    "                    // Add interaction tests based on real component code" +
+    "                });" +
+    "            });", componentName, componentName, componentName, componentName, componentName.toLowerCase(), componentName));
         return test;
     }
     
@@ -876,17 +863,16 @@ public class PathFlowAnalysisService {
         test.setPriority(TestPriority.MEDIUM);
         test.setDescription("Unit test for " + functionName + " function in " + serviceName);
         test.setLanguage("javascript");
-        test.setCode(String.format("""
-            import { %s } from './utils';
-            
-            describe('%s Function', () => {
-                test('should work correctly', () => {
-                    // Test based on real function implementation
-                    const result = %s();
-                    expect(result).toBeDefined();
-                });
-            });
-            """, functionName, functionName, functionName));
+        test.setCode(String.format(
+    "            import { %s } from './utils';" +
+    "            " +
+    "            describe('%s Function', () => {" +
+    "                test('should work correctly', () => {" +
+    "                    // Test based on real function implementation" +
+    "                    const result = %s();" +
+    "                    expect(result).toBeDefined();" +
+    "                });" +
+    "            });", functionName, functionName, functionName));
         return test;
     }
     
@@ -898,22 +884,21 @@ public class PathFlowAnalysisService {
         test.setPriority(TestPriority.MEDIUM);
         test.setDescription("Unit test for " + controllerName + " controller in " + serviceName);
         test.setLanguage("java");
-        test.setCode(String.format("""
-            @SpringBootTest
-            @AutoConfigureTestDatabase
-            class %sTest {
-                
-                @Autowired
-                private TestRestTemplate restTemplate;
-                
-                @Test
-                void testControllerEndpoints() {
-                    // Test based on real controller implementation
-                    ResponseEntity<String> response = restTemplate.getForEntity("/api/test", String.class);
-                    assertEquals(HttpStatus.OK, response.getStatusCode());
-                }
-            }
-            """, controllerName));
+        test.setCode(String.format(
+            "@SpringBootTest\n" +
+            "@AutoConfigureTestDatabase\n" +
+            "class %sTest {\n" +
+            "    \n" +
+            "    @Autowired\n" +
+            "    private TestRestTemplate restTemplate;\n" +
+            "    \n" +
+            "    @Test\n" +
+            "    void testControllerEndpoints() {\n" +
+            "        // Test based on real controller implementation\n" +
+            "        ResponseEntity<String> response = restTemplate.getForEntity(\"/api/test\", String.class);\n" +
+            "        assertEquals(HttpStatus.OK, response.getStatusCode());\n" +
+            "    }\n" +
+            "}", controllerName));
         return test;
     }
     
@@ -925,20 +910,19 @@ public class PathFlowAnalysisService {
         test.setPriority(TestPriority.MEDIUM);
         test.setDescription("Unit test for " + serviceName + " service in " + serviceType);
         test.setLanguage("java");
-        test.setCode(String.format("""
-            @SpringBootTest
-            class %sTest {
-                
-                @Autowired
-                private %s %s;
-                
-                @Test
-                void testServiceMethod() {
-                    // Test based on real service implementation
-                    // Add specific test logic based on actual service code
-                }
-            }
-            """, serviceName, serviceName, serviceName.toLowerCase()));
+        test.setCode(String.format(
+    "            @SpringBootTest" +
+    "            class %sTest {" +
+    "                " +
+    "                @Autowired" +
+    "                private %s %s;" +
+    "                " +
+    "                @Test" +
+    "                void testServiceMethod() {" +
+    "                    // Test based on real service implementation" +
+    "                    // Add specific test logic based on actual service code" +
+    "                }" +
+    "            }", serviceName, serviceName, serviceName.toLowerCase()));
         return test;
     }
     
@@ -950,23 +934,22 @@ public class PathFlowAnalysisService {
         test.setPriority(TestPriority.MEDIUM);
         test.setDescription("Unit test for " + repositoryName + " repository in " + serviceName);
         test.setLanguage("java");
-        test.setCode(String.format("""
-            @DataJpaTest
-            class %sTest {
-                
-                @Autowired
-                private TestEntityManager entityManager;
-                
-                @Autowired
-                private %s %s;
-                
-                @Test
-                void testRepositoryMethods() {
-                    // Test based on real repository implementation
-                    // Add specific test logic based on actual repository code
-                }
-            }
-            """, repositoryName, repositoryName, repositoryName.toLowerCase()));
+        test.setCode(String.format(
+    "            @DataJpaTest" +
+    "            class %sTest {" +
+    "                " +
+    "                @Autowired" +
+    "                private TestEntityManager entityManager;" +
+    "                " +
+    "                @Autowired" +
+    "                private %s %s;" +
+    "                " +
+    "                @Test" +
+    "                void testRepositoryMethods() {" +
+    "                    // Test based on real repository implementation" +
+    "                    // Add specific test logic based on actual repository code" +
+    "                }" +
+    "            }", repositoryName, repositoryName, repositoryName.toLowerCase()));
         return test;
     }
     
@@ -978,13 +961,12 @@ public class PathFlowAnalysisService {
         test.setPriority(TestPriority.MEDIUM);
         test.setDescription("Unit test for " + tableName + " table in " + serviceName);
         test.setLanguage("sql");
-        test.setCode(String.format("""
-            -- Test for %s table
-            SELECT COUNT(*) FROM %s;
-            
-            -- Test table constraints
-            -- Add specific tests based on actual table structure
-            """, tableName, tableName));
+        test.setCode(String.format(
+    "            -- Test for %s table" +
+    "            SELECT COUNT(*) FROM %s;" +
+    "            " +
+    "            -- Test table constraints" +
+    "            -- Add specific tests based on actual table structure", tableName, tableName));
         return test;
     }
     
@@ -996,21 +978,20 @@ public class PathFlowAnalysisService {
         test.setPriority(TestPriority.MEDIUM);
         test.setDescription("Integration test for " + controllerName + " and " + serviceName + " in " + serviceType);
         test.setLanguage("java");
-        test.setCode(String.format("""
-            @SpringBootTest
-            @AutoConfigureTestDatabase
-            class %s%sIntegrationTest {
-                
-                @Autowired
-                private TestRestTemplate restTemplate;
-                
-                @Test
-                void testControllerServiceIntegration() {
-                    // Integration test based on real code structure
-                    // Test the actual interaction between controller and service
-                }
-            }
-            """, controllerName, serviceName));
+        test.setCode(String.format(
+    "            @SpringBootTest" +
+    "            @AutoConfigureTestDatabase" +
+    "            class %s%sIntegrationTest {" +
+    "                " +
+    "                @Autowired" +
+    "                private TestRestTemplate restTemplate;" +
+    "                " +
+    "                @Test" +
+    "                void testControllerServiceIntegration() {" +
+    "                    // Integration test based on real code structure" +
+    "                    // Test the actual interaction between controller and service" +
+    "                }" +
+    "            }", controllerName, serviceName));
         return test;
     }
     
@@ -1022,21 +1003,20 @@ public class PathFlowAnalysisService {
         test.setPriority(TestPriority.MEDIUM);
         test.setDescription("Integration test for " + serviceName + " and " + repositoryName + " in " + serviceType);
         test.setLanguage("java");
-        test.setCode(String.format("""
-            @SpringBootTest
-            @AutoConfigureTestDatabase
-            class %s%sIntegrationTest {
-                
-                @Autowired
-                private %s %s;
-                
-                @Test
-                void testServiceRepositoryIntegration() {
-                    // Integration test based on real code structure
-                    // Test the actual interaction between service and repository
-                }
-            }
-            """, serviceName, repositoryName, serviceName, serviceName.toLowerCase()));
+        test.setCode(String.format(
+    "            @SpringBootTest" +
+    "            @AutoConfigureTestDatabase" +
+    "            class %s%sIntegrationTest {" +
+    "                " +
+    "                @Autowired" +
+    "                private %s %s;" +
+    "                " +
+    "                @Test" +
+    "                void testServiceRepositoryIntegration() {" +
+    "                    // Integration test based on real code structure" +
+    "                    // Test the actual interaction between service and repository" +
+    "                }" +
+    "            }", serviceName, repositoryName, serviceName, serviceName.toLowerCase()));
         return test;
     }
 }

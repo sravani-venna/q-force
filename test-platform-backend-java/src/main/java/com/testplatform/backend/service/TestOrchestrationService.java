@@ -382,15 +382,15 @@ public class TestOrchestrationService {
         
         for (String service : services) {
             // Configure service for CI/CD environment
-            String config = String.format("""
-                {
-                    "environment": "ci",
-                    "database": "test_db",
-                    "timeout": 30000,
-                    "retries": 3,
-                    "parallel": true
-                }
-                """);
+            String config = String.format(
+                "{\n" +
+                "    \"environment\": \"ci\",\n" +
+                "    \"database\": \"test_db\",\n" +
+                "    \"timeout\": 30000,\n" +
+                "    \"retries\": 3,\n" +
+                "    \"parallel\": true\n" +
+                "}"
+            );
             configs.put(service, config);
         }
         

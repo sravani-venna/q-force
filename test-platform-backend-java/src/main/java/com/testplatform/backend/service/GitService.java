@@ -224,17 +224,15 @@ public class GitService {
         }
         
         // If actual file not found, return a message indicating the issue
-        return """
-            // ERROR: Could not read actual repository file
-            // Expected file path: Spring/demo/src/main/java/com/example/demo/""" + filePath + """
-            
-            // Please ensure:
-            // 1. Repository path is correctly configured: """ + repositoryPath + """
-            // 2. Spring Boot files exist in the expected location
-            // 3. File permissions allow reading the files
-            
-            // This is a placeholder - the system should read your actual Spring Boot code
-            """;
+        return "// ERROR: Could not read actual repository file\n" +
+               "// Expected file path: Spring/demo/src/main/java/com/example/demo/" + filePath + "\n" +
+               "\n" +
+               "// Please ensure:\n" +
+               "// 1. Repository path is correctly configured: " + repositoryPath + "\n" +
+               "// 2. Spring Boot files exist in the expected location\n" +
+               "// 3. File permissions allow reading the files\n" +
+               "\n" +
+               "// This is a placeholder - the system should read your actual Spring Boot code";
     }
     
     // ==================== Remote Repository Management ====================

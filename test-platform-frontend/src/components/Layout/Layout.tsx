@@ -29,6 +29,7 @@ import {
   Notifications as NotificationsIcon,
   AccountCircle as AccountCircleIcon,
   Logout as LogoutIcon,
+  SmartToy as SmartToyIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -58,6 +59,11 @@ const navigationItems: NavigationItem[] = [
     icon: <PlayArrowIcon />,
     path: '/test-execution',
     permission: 'EXECUTE_TESTS',
+  },
+  {
+    text: 'AI PR Review',
+    icon: <SmartToyIcon />,
+    path: '/ai-review',
   },
   {
     text: 'Reports',

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Service
 public class PullRequestService {
@@ -200,7 +201,7 @@ public class PullRequestService {
     public List<PullRequest> getPullRequestsByStatus(PRStatus status) {
         return pullRequests.stream()
                 .filter(pr -> pr.getStatus() == status)
-                .toList();
+                .collect(Collectors.toList());
     }
     
 }

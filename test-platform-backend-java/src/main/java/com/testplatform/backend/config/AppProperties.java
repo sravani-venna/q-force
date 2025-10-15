@@ -14,6 +14,8 @@ public class AppProperties {
     private RateLimit rateLimit = new RateLimit();
     private TestGeneration testGeneration = new TestGeneration();
     private Llm llm = new Llm();
+    private Github github = new Github();
+    private Reviewer reviewer = new Reviewer();
     private MockData mockData = new MockData();
     
     // Inner classes for nested properties
@@ -62,13 +64,13 @@ public class AppProperties {
     }
     
     public static class Llm {
-        private String provider = "openai";
-        private String apiKey = "your-api-key-here";
-        private String model = "gpt-4o-mini";
-        private String baseUrl = "https://api.openai.com/v1";
-        private Integer maxTokens = 4000;
-        private Double temperature = 0.3;
-        private Long timeout = 30000L;
+        private String provider = "local";
+        private String apiKey = "local-model";
+        private String model = "codegemma:7b";
+        private String baseUrl = "http://localhost:11434";
+        private Integer maxTokens = 8000;
+        private Double temperature = 0.2;
+        private Long timeout = 60000L;
         
         // Getters and Setters
         public String getProvider() { return provider; }
@@ -91,6 +93,20 @@ public class AppProperties {
         
         public Long getTimeout() { return timeout; }
         public void setTimeout(Long timeout) { this.timeout = timeout; }
+    }
+    
+    public static class Github {
+        private String token = "${GITHUB_TOKEN:your-github-token}";
+        
+        public String getToken() { return token; }
+        public void setToken(String token) { this.token = token; }
+    }
+    
+    public static class Reviewer {
+        private Boolean autoInlineComment = true;
+        
+        public Boolean isAutoInlineComment() { return autoInlineComment; }
+        public void setAutoInlineComment(Boolean autoInlineComment) { this.autoInlineComment = autoInlineComment; }
     }
     
     public static class MockData {
@@ -127,6 +143,12 @@ public class AppProperties {
     
     public Llm getLlm() { return llm; }
     public void setLlm(Llm llm) { this.llm = llm; }
+    
+    public Github getGithub() { return github; }
+    public void setGithub(Github github) { this.github = github; }
+    
+    public Reviewer getReviewer() { return reviewer; }
+    public void setReviewer(Reviewer reviewer) { this.reviewer = reviewer; }
     
     public MockData getMockData() { return mockData; }
     public void setMockData(MockData mockData) { this.mockData = mockData; }

@@ -41,6 +41,7 @@ class AuthService {
     headers: {
       'Content-Type': 'application/json',
     },
+    withCredentials: true,
   });
 
   constructor() {

@@ -45,24 +45,19 @@ public class TestGenerationService {
      */
     private void generateRealSpringBootTests() {
         try {
-            logger.info("🔍 Analyzing Spring Boot code to generate real test cases...");
+            logger.info("🔍 Analyzing Kepler App Spring Boot code to generate real test cases...");
             
-            // Generate test cases for actual Spring Boot files
-            generateTestsForSpringBootFile("services/UsersService.java", "UsersService", TestType.UNIT);
-            generateTestsForSpringBootFile("services/BookingService.java", "BookingService", TestType.UNIT);
-            generateTestsForSpringBootFile("Entity/Users.java", "Users", TestType.UNIT);
-            generateTestsForSpringBootFile("repository/UsersRepository.java", "UsersRepository", TestType.INTEGRATION);
-            generateTestsForSpringBootFile("repository/BookingRepository.java", "BookingRepository", TestType.INTEGRATION);
+            // Generate test cases for actual Kepler App services - UNIT and INTEGRATION tests
+            generateTestsForSpringBootFile("project-service/src/main/java/com/appen/kepler/project/service/ProjectService.java", "ProjectService", TestType.UNIT);
+            generateTestsForSpringBootFile("project-service/src/main/java/com/appen/kepler/project/service/ProjectService.java", "ProjectService", TestType.INTEGRATION);
+            generateTestsForSpringBootFile("contributor-service/src/main/java/com/appen/kepler/contributor/service/ContributorService.java", "ContributorService", TestType.UNIT);
+            generateTestsForSpringBootFile("contributor-service/src/main/java/com/appen/kepler/contributor/service/ContributorService.java", "ContributorService", TestType.INTEGRATION);
+            generateTestsForSpringBootFile("work-service/src/main/java/com/appen/kepler/work/service/WorkService.java", "WorkService", TestType.UNIT);
+            generateTestsForSpringBootFile("work-service/src/main/java/com/appen/kepler/work/service/WorkService.java", "WorkService", TestType.INTEGRATION);
+            generateTestsForSpringBootFile("api-gateway/src/main/java/com/appen/kepler/gateway/service/ApiGatewayService.java", "ApiGatewayService", TestType.UNIT);
+            generateTestsForSpringBootFile("batchjob-service/src/main/java/com/appen/kepler/batchjob/service/BatchJobService.java", "BatchJobService", TestType.UNIT);
             
-            // Generate test cases for Kepler App services - UNIT and INTEGRATION tests
-            generateTestsForSpringBootFile("project-service/ProjectService.java", "ProjectService", TestType.UNIT);
-            generateTestsForSpringBootFile("project-service/ProjectService.java", "ProjectService", TestType.INTEGRATION);
-            generateTestsForSpringBootFile("contributor-service/ContributorService.java", "ContributorService", TestType.UNIT);
-            generateTestsForSpringBootFile("contributor-service/ContributorService.java", "ContributorService", TestType.INTEGRATION);
-            generateTestsForSpringBootFile("work-service/WorkService.java", "WorkService", TestType.UNIT);
-            generateTestsForSpringBootFile("work-service/WorkService.java", "WorkService", TestType.INTEGRATION);
-            
-            logger.info("✅ Generated {} real test suites from Spring Boot code", generatedTests.size());
+            logger.info("✅ Generated {} real test suites from Kepler App Spring Boot code", generatedTests.size());
         } catch (Exception e) {
             logger.error("❌ Error initializing real test generation: {}", e.getMessage());
         }
