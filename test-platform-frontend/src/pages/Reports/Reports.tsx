@@ -86,14 +86,36 @@ const Reports: React.FC = () => {
     },
   ];
 
-  // Performance metrics data
-  const performanceData = testSuites.map((suite, index) => ({
-    name: suite.name.split(' ')[0] || `Suite ${index + 1}`,
-    tests: suite.testCases?.length || 0,
-    passed: suite.testCases?.filter((t: any) => t.status === 'PASSED').length || 0,
-    failed: suite.testCases?.filter((t: any) => t.status === 'FAILED').length || 0,
-    coverage: suite.coverage || 0,
-  }));
+  // Performance metrics data - Group by service (combine UNIT and INTEGRATION)
+  const performanceData = (() => {
+    const serviceGroups: { [key: string]: { passed: number; failed: number; tests: number } } = {};
+    
+    testSuites.forEach((suite) => {
+      // Extract service name (e.g., "ProjectService" from "ProjectService UNIT Tests")
+      const serviceName = suite.name
+        ?.replace(/\s*(UNIT|INTEGRATION)\s*Tests?/gi, '')
+        ?.trim();
+      
+      if (serviceName) {
+        if (!serviceGroups[serviceName]) {
+          serviceGroups[serviceName] = { passed: 0, failed: 0, tests: 0 };
+        }
+        
+        const passed = suite.testCases?.filter((t: any) => t.status === 'PASSED').length || 0;
+        const failed = suite.testCases?.filter((t: any) => t.status === 'FAILED').length || 0;
+        const tests = suite.testCases?.length || 0;
+        
+        serviceGroups[serviceName].passed += passed;
+        serviceGroups[serviceName].failed += failed;
+        serviceGroups[serviceName].tests += tests;
+      }
+    });
+    
+    return Object.entries(serviceGroups).map(([name, metrics]) => ({
+      name,
+      ...metrics,
+    }));
+  })();
 
   // Execution time trends
   const trendData = dashboardData?.trendsData?.map((trend: any) => ({
@@ -103,15 +125,31 @@ const Reports: React.FC = () => {
     total: trend.passed + trend.failed,
   })) || [];
 
-  // Test suite distribution for pie chart
-  const suiteDistribution = testSuites.map((suite, index) => {
+  // Test suite distribution for pie chart - Group by service (combine UNIT and INTEGRATION)
+  const suiteDistribution = (() => {
+    const serviceGroups: { [key: string]: number } = {};
+    
+    testSuites.forEach((suite) => {
+      // Extract service name (e.g., "ProjectService" from "ProjectService UNIT Tests")
+      const serviceName = suite.name
+        ?.replace(/\s*(UNIT|INTEGRATION)\s*Tests?/gi, '')
+        ?.trim();
+      
+      if (serviceName) {
+        const testCount = suite.testCases?.length || 0;
+        serviceGroups[serviceName] = (serviceGroups[serviceName] || 0) + testCount;
+      }
+    });
+    
     const colors = ['#2196f3', '#4caf50', '#ff9800', '#f44336', '#9c27b0', '#00bcd4', '#8bc34a'];
-    return {
-      name: suite.name.split(' ')[0] || `Suite ${index + 1}`,
-      value: suite.testCases?.length || 0,
-      color: colors[index % colors.length],
-    };
-  }).filter(s => s.value > 0);
+    return Object.entries(serviceGroups)
+      .map(([name, value], index) => ({
+        name,
+        value,
+        color: colors[index % colors.length],
+      }))
+      .filter(s => s.value > 0);
+  })();
 
   const avgExecutionTime = dashboardData?.executionTime 
     ? (dashboardData.executionTime / 1000).toFixed(2) 

@@ -203,7 +203,8 @@ const Dashboard: React.FC = () => {
       const runningSuites = testSuites.map(suite => ({
         ...suite,
         status: 'RUNNING',
-        startedAt: new Date().toISOString()
+        startedAt: new Date().toISOString(),
+        progress: 0
       }));
       setRunningTestSuites(runningSuites);
       console.log('🏃‍♂️ Marked test suites as running:', runningSuites);
@@ -221,25 +222,61 @@ const Dashboard: React.FC = () => {
         }
       });
       
-      // Wait for all executions to complete
+      // Wait for all executions to start
       const results = await Promise.all(executionPromises);
-      console.log('🎉 All test executions completed:', results);
+      console.log('🎉 All test executions started:', results);
       
-      // Simulate longer test execution time (1-2 minutes)
-      await new Promise(resolve => setTimeout(resolve, 90000)); // 90 seconds
+      // Poll for test status updates
+      let pollCount = 0;
+      const maxPolls = 24; // Poll for up to 2 minutes (24 * 5 seconds)
       
-      // Clear running suites after execution
-      setRunningTestSuites([]);
+      const pollInterval = setInterval(async () => {
+        pollCount++;
+        console.log(`🔄 Polling for test status (attempt ${pollCount}/${maxPolls})...`);
+        
+        try {
+          // Fetch updated test suites
+          const response = await testSuiteService.getAll();
+          const updatedSuites = response.data || [];
+          
+          // Update running test suites with latest status
+          const stillRunning = runningSuites
+            .map(runningSuite => {
+              const updated = updatedSuites.find((s: any) => s.id === runningSuite.id);
+              if (updated) {
+                return {
+                  ...runningSuite,
+                  ...updated,
+                  startedAt: runningSuite.startedAt // Keep original start time
+                };
+              }
+              return runningSuite;
+            })
+            .filter((suite: any) => suite.status === 'RUNNING' || suite.status === 'PENDING');
+          
+          setRunningTestSuites(stillRunning);
+          console.log(`📊 Still running: ${stillRunning.length} suites`);
+          
+          // Stop polling if all tests are complete or max polls reached
+          if (stillRunning.length === 0 || pollCount >= maxPolls) {
+            clearInterval(pollInterval);
+            console.log('✅ Test execution polling complete');
+            setRunningTestSuites([]);
+            setExecutingTests(false);
+            
+            // Refresh dashboard data
+            await fetchDashboardData();
+          }
+        } catch (error) {
+          console.error('❌ Error polling test status:', error);
+        }
+      }, 5000); // Poll every 5 seconds
       
-      // Refresh dashboard data
-      await fetchDashboardData();
-      
-      console.log('✅ Codebase test execution completed');
+      console.log('✅ Codebase test execution initiated');
     } catch (error) {
       console.error('❌ Failed to execute codebase tests:', error);
       setError('Failed to execute codebase tests: ' + (error as Error).message);
       setRunningTestSuites([]);
-    } finally {
       setExecutingTests(false);
     }
   };
@@ -742,12 +779,29 @@ const Dashboard: React.FC = () => {
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart style={{ backgroundColor: 'white' }}>
                     <Pie
-                      data={testSuites?.slice(0, 8).map((suite: any, index: number) => ({
-                        name: suite.name ? suite.name.substring(0, 12) : `Suite ${suite.id}`,
-                        value: suite.testCases ? suite.testCases.length : (suite.testCount || 1),
-                        status: suite.status || 'READY',
-                        tests: suite.testCases ? suite.testCases.length : (suite.testCount || 1)
-                      })) || []}
+                      data={(() => {
+                        // Group test suites by service name
+                        const serviceGroups: { [key: string]: number } = {};
+                        
+                        testSuites?.forEach((suite: any) => {
+                          // Extract service name (e.g., "ProjectService" from "ProjectService UNIT Tests")
+                          const serviceName = suite.name
+                            ?.replace(/\s*(UNIT|INTEGRATION)\s*Tests?/gi, '')
+                            ?.trim();
+                          
+                          if (serviceName) {
+                            const testCount = suite.testCases ? suite.testCases.length : (suite.testCount || 0);
+                            serviceGroups[serviceName] = (serviceGroups[serviceName] || 0) + testCount;
+                          }
+                        });
+                        
+                        // Convert to array format for chart
+                        return Object.entries(serviceGroups).map(([name, count]) => ({
+                          name,
+                          value: count,
+                          tests: count
+                        }));
+                      })()}
                       cx="50%"
                       cy="50%"
                       labelLine={false}
@@ -756,10 +810,19 @@ const Dashboard: React.FC = () => {
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {testSuites?.slice(0, 8).map((entry: any, index: number) => {
-                        const colors = ['#4caf50', '#2196f3', '#ff9800', '#f44336'];
-                        return <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />;
-                      })}
+                      {(() => {
+                        const serviceGroups: { [key: string]: number } = {};
+                        testSuites?.forEach((suite: any) => {
+                          const serviceName = suite.name?.replace(/\s*(UNIT|INTEGRATION)\s*Tests?/gi, '')?.trim();
+                          if (serviceName) {
+                            serviceGroups[serviceName] = (serviceGroups[serviceName] || 0) + 1;
+                          }
+                        });
+                        const colors = ['#4caf50', '#2196f3', '#ff9800', '#f44336', '#9c27b0', '#00bcd4'];
+                        return Object.keys(serviceGroups).map((key, index) => (
+                          <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                        ));
+                      })()}
                     </Pie>
                     <Tooltip 
                       contentStyle={{
@@ -1199,81 +1262,84 @@ const Dashboard: React.FC = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {realTestCases?.completedTests?.slice(0, 10).map((testCase: any, index: number) => (
-                    <TableRow key={index}>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <CheckCircleIcon color="success" />
-                          <Typography variant="body2" fontWeight="medium">
-                            {testCase.testCase}
+                  {(() => {
+                    // Extract all test cases from completed test suites
+                    const completedTestCases: any[] = [];
+                    testSuites
+                      .filter(suite => suite.status === 'COMPLETED' && suite.testCases && suite.testCases.length > 0)
+                      .forEach(suite => {
+                        suite.testCases.forEach((testCase: any) => {
+                          completedTestCases.push({
+                            ...testCase,
+                            suiteName: suite.name,
+                            suiteType: suite.type,
+                            lastRun: suite.lastRun
+                          });
+                        });
+                      });
+                    
+                    // Sort by most recent and take top 10
+                    const recentTests = completedTestCases
+                      .sort((a, b) => {
+                        if (!a.lastRun) return 1;
+                        if (!b.lastRun) return -1;
+                        return new Date(b.lastRun).getTime() - new Date(a.lastRun).getTime();
+                      })
+                      .slice(0, 10);
+                    
+                    if (recentTests.length === 0) {
+                      return (
+                        <TableRow>
+                          <TableCell colSpan={5} align="center">
+                            <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
+                              No completed test cases yet. Run tests to see results here.
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    }
+                    
+                    return recentTests.map((testCase, index) => (
+                      <TableRow key={index}>
+                        <TableCell>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            {testCase.status === 'PASSED' ? (
+                              <CheckCircleIcon color="success" fontSize="small" />
+                            ) : (
+                              <CloseIcon color="error" fontSize="small" />
+                            )}
+                            <Typography variant="body2" fontWeight="medium">
+                              {testCase.name}
+                            </Typography>
+                          </Box>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2" sx={{ fontSize: '0.85rem' }}>
+                            {testCase.suiteName}
                           </Typography>
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Chip 
-                          label={testCase.suite} 
-                          size="small" 
-                          color={testCase.suite === 'UNIT' ? 'primary' : 
-                                 testCase.suite === 'INTEGRATION' ? 'secondary' : 'default'}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          size="small"
-                          label={testCase.status}
-                          color="success"
-                          variant="outlined"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">
-                          {testCase.duration}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" color="text.secondary">
-                          {testCase.completed}
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  )) || testSuites.slice(0, 10).map((suite) => (
-                    <TableRow key={suite.id}>
-                      <TableCell>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <CheckCircleIcon color="success" />
-                          <Typography variant="body2" fontWeight="medium">
-                            {suite.name} Test Cases
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            size="small"
+                            label={testCase.status}
+                            color={testCase.status === 'PASSED' ? 'success' : 
+                                   testCase.status === 'FAILED' ? 'error' : 'default'}
+                            variant="outlined"
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2">
+                            {testCase.suiteType}
                           </Typography>
-                        </Box>
-                      </TableCell>
-                      <TableCell>
-                        <Chip 
-                          label={suite.type} 
-                          size="small" 
-                          color={suite.type === 'UNIT' ? 'primary' : 
-                                 suite.type === 'INTEGRATION' ? 'secondary' : 'default'}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          size="small"
-                          label="COMPLETED"
-                          color="success"
-                          variant="outlined"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">
-                          {Math.floor(Math.random() * 30) + 10}s
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" color="text.secondary">
-                          {new Date().toLocaleTimeString()}
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2" color="text.secondary">
+                            {testCase.lastRun ? new Date(testCase.lastRun).toLocaleTimeString() : 'Just now'}
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    ));
+                  })()}
                 </TableBody>
               </Table>
             </TableContainer>
