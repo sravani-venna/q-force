@@ -105,6 +105,15 @@ export const testSuiteService = {
       throw new Error(error.response?.data?.message || 'Failed to delete test suite');
     }
   },
+
+  async getServiceLevelTests() {
+    try {
+      const response = await apiClient.get('/tests/services');
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Failed to fetch service-level tests');
+    }
+  },
 };
 
 // Test Executions API

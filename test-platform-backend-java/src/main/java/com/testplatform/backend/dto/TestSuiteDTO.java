@@ -18,6 +18,10 @@ public class TestSuiteDTO {
     private String language;
     private TestStatus status;
     private List<TestCase> testCases;
+    private Integer totalTests;
+    private Integer passedTests;
+    private Integer failedTests;
+    private Long executionTime;
     private LocalDateTime generatedAt;
     private LocalDateTime lastRun;  // Added for frontend compatibility
     private Double coverage;  // Added for frontend compatibility
@@ -34,14 +38,19 @@ public class TestSuiteDTO {
         this.language = suite.getLanguage();
         this.status = suite.getStatus();
         this.testCases = suite.getTestCases();
+        this.totalTests = suite.getTotalTests();
+        this.passedTests = suite.getPassedTests();
+        this.failedTests = suite.getFailedTests();
+        this.executionTime = suite.getExecutionTime();
         this.generatedAt = suite.getGeneratedAt();
         this.lastRun = suite.getLastRun(); // Get last run time from suite
         
-        // Generate a name from filePath and type for frontend compatibility
-        this.name = generateSuiteName(suite.getFilePath(), suite.getType());
+        // Use suite name if available, otherwise generate from filePath
+        this.name = suite.getName() != null ? suite.getName() : 
+                    generateSuiteName(suite.getFilePath(), suite.getType());
         
-        // Generate a mock coverage percentage for frontend compatibility
-        this.coverage = generateMockCoverage();
+        // Use suite coverage if available, otherwise generate mock
+        this.coverage = suite.getCoverage() != null ? suite.getCoverage() : generateMockCoverage();
     }
     
     private String generateSuiteName(String filePath, TestType type) {
@@ -98,4 +107,16 @@ public class TestSuiteDTO {
     
     public Double getCoverage() { return coverage; }
     public void setCoverage(Double coverage) { this.coverage = coverage; }
+    
+    public Integer getTotalTests() { return totalTests; }
+    public void setTotalTests(Integer totalTests) { this.totalTests = totalTests; }
+    
+    public Integer getPassedTests() { return passedTests; }
+    public void setPassedTests(Integer passedTests) { this.passedTests = passedTests; }
+    
+    public Integer getFailedTests() { return failedTests; }
+    public void setFailedTests(Integer failedTests) { this.failedTests = failedTests; }
+    
+    public Long getExecutionTime() { return executionTime; }
+    public void setExecutionTime(Long executionTime) { this.executionTime = executionTime; }
 }

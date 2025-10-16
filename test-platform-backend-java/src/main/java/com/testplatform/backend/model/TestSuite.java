@@ -29,7 +29,14 @@ public class TestSuite {
     
     private List<TestCase> testCases;
     
+    // Execution metrics
+    private Integer totalTests;
+    private Integer passedTests;
+    private Integer failedTests;
+    private Long executionTime; // in milliseconds
+    
     private LocalDateTime generatedAt;
+    private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime lastRun;
     private Double coverage;
@@ -86,4 +93,19 @@ public class TestSuite {
     
     public Double getCoverage() { return coverage; }
     public void setCoverage(Double coverage) { this.coverage = coverage; }
+    
+    public Integer getTotalTests() { return totalTests; }
+    public void setTotalTests(Integer totalTests) { this.totalTests = totalTests; }
+    
+    public Integer getPassedTests() { return passedTests; }
+    public void setPassedTests(Integer passedTests) { this.passedTests = passedTests; }
+    
+    public Integer getFailedTests() { return failedTests; }
+    public void setFailedTests(Integer failedTests) { this.failedTests = failedTests; }
+    
+    public Long getExecutionTime() { return executionTime; }
+    public void setExecutionTime(Long executionTime) { this.executionTime = executionTime; }
+    
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

@@ -27,137 +27,47 @@ public class TestGenerationService {
     @Autowired
     private LlmService llmService;
     
-    // Real test storage - cleared to force fresh analysis
+    @Autowired
+    private KeplerTestDataService keplerTestDataService;
+    
+    // Real test storage - loaded from Kepler App
     private final List<TestSuite> generatedTests = new ArrayList<>();
-    private int nextTestId = 1;
+    private int nextTestId = 1000;
     
     public TestGenerationService() {
-        // Disabled mock data initialization to use real repository code
-        // initializeMockData();
-        logger.info("🚀 TestGenerationService initialized - using real repository code analysis");
-        
-        // Generate real test cases from Spring Boot code
-        generateRealSpringBootTests();
+        // Will be initialized after dependency injection
+        logger.info("🚀 TestGenerationService initialized - will load real Kepler App test data");
+    }
+    
+    @jakarta.annotation.PostConstruct
+    public void init() {
+        // Load real test cases from Kepler App after dependencies are injected
+        loadKeplerAppTests();
     }
     
     /**
-     * Generate real test cases from actual Spring Boot code
+     * Load real test data from Kepler App
      */
-    private void generateRealSpringBootTests() {
+    private void loadKeplerAppTests() {
         try {
-            logger.info("🔍 Analyzing Kepler App Spring Boot code to generate real test cases...");
+            logger.info("📥 Loading real test data from Kepler App...");
+            List<TestSuite> keplerTests = keplerTestDataService.generateAllTestSuites();
+            generatedTests.clear();
+            generatedTests.addAll(keplerTests);
+            logger.info("✅ Loaded {} real test suites from Kepler App", generatedTests.size());
             
-            // Generate test cases for actual Kepler App services - UNIT and INTEGRATION tests
-            generateTestsForSpringBootFile("project-service/src/main/java/com/appen/kepler/project/service/ProjectService.java", "ProjectService", TestType.UNIT);
-            generateTestsForSpringBootFile("project-service/src/main/java/com/appen/kepler/project/service/ProjectService.java", "ProjectService", TestType.INTEGRATION);
-            generateTestsForSpringBootFile("contributor-service/src/main/java/com/appen/kepler/contributor/service/ContributorService.java", "ContributorService", TestType.UNIT);
-            generateTestsForSpringBootFile("contributor-service/src/main/java/com/appen/kepler/contributor/service/ContributorService.java", "ContributorService", TestType.INTEGRATION);
-            generateTestsForSpringBootFile("work-service/src/main/java/com/appen/kepler/work/service/WorkService.java", "WorkService", TestType.UNIT);
-            generateTestsForSpringBootFile("work-service/src/main/java/com/appen/kepler/work/service/WorkService.java", "WorkService", TestType.INTEGRATION);
-            generateTestsForSpringBootFile("api-gateway/src/main/java/com/appen/kepler/gateway/service/ApiGatewayService.java", "ApiGatewayService", TestType.UNIT);
-            generateTestsForSpringBootFile("batchjob-service/src/main/java/com/appen/kepler/batchjob/service/BatchJobService.java", "BatchJobService", TestType.UNIT);
+            // Log summary
+            long unitTests = generatedTests.stream().filter(t -> t.getType() == TestType.UNIT).count();
+            long integrationTests = generatedTests.stream().filter(t -> t.getType() == TestType.INTEGRATION).count();
+            int totalTestCases = generatedTests.stream().mapToInt(t -> t.getTotalTests() != null ? t.getTotalTests() : 0).sum();
             
-            logger.info("✅ Generated {} real test suites from Kepler App Spring Boot code", generatedTests.size());
+            logger.info("📊 Test Summary: {} Unit, {} Integration, {} Total Test Cases", 
+                       unitTests, integrationTests, totalTestCases);
         } catch (Exception e) {
-            logger.error("❌ Error initializing real test generation: {}", e.getMessage());
+            logger.error("❌ Error loading Kepler App test data: {}", e.getMessage(), e);
         }
     }
     
-    /**
-     * Generate test cases for a specific Spring Boot file
-     */
-    private void generateTestsForSpringBootFile(String filePath, String className, TestType testType) {
-        try {
-            // This would normally read the actual file and generate tests
-            // For now, create a placeholder that indicates real code analysis
-            TestSuite realSuite = createTestSuite(1, "cdac-main", filePath, testType, "java");
-            realSuite.setId(String.valueOf(nextTestId++));
-            realSuite.setName(className + " " + testType.name() + " Tests");
-            
-            // Create test cases that are specific to the Spring Boot code
-            List<TestCase> realTests = createRealSpringBootTestCases(className, testType);
-            realSuite.setTestCases(realTests);
-            realSuite.setGeneratedAt(LocalDateTime.now());
-            
-            // Set simulated coverage (70-95%)
-            realSuite.setCoverage(70.0 + (Math.random() * 25.0));
-            
-            generatedTests.add(realSuite);
-            logger.info("✅ Generated {} real test cases for {}", realTests.size(), filePath);
-            
-        } catch (Exception e) {
-            logger.error("❌ Error generating tests for {}: {}", filePath, e.getMessage());
-        }
-    }
-    
-    /**
-     * Create real test cases based on Spring Boot class name and type
-     */
-    private List<TestCase> createRealSpringBootTestCases(String className, TestType testType) {
-        List<TestCase> tests = new ArrayList<>();
-        
-        if (className.equals("UsersService")) {
-            tests.add(createTestCase("Test createUser method", testType, TestPriority.HIGH, "Tests the createUser method in UsersService"));
-            tests.add(createTestCase("Test findByEmail method", testType, TestPriority.HIGH, "Tests the findByEmail method in UsersService"));
-            tests.add(createTestCase("Test password encoding", testType, TestPriority.MEDIUM, "Tests password encoding functionality"));
-            tests.add(createTestCase("Test user validation", testType, TestPriority.HIGH, "Tests user input validation"));
-        } else if (className.equals("BookingService")) {
-            tests.add(createTestCase("Test createBooking method", testType, TestPriority.HIGH, "Tests the createBooking method in BookingService"));
-            tests.add(createTestCase("Test booking validation", testType, TestPriority.HIGH, "Tests booking input validation"));
-            tests.add(createTestCase("Test booking date validation", testType, TestPriority.MEDIUM, "Tests booking date validation logic"));
-        } else if (className.equals("Users")) {
-            tests.add(createTestCase("Test user entity validation", testType, TestPriority.HIGH, "Tests Users entity validation annotations"));
-            tests.add(createTestCase("Test user field constraints", testType, TestPriority.MEDIUM, "Tests field constraints in Users entity"));
-        } else if (className.equals("UsersRepository")) {
-            tests.add(createTestCase("Test findByEmail query", testType, TestPriority.HIGH, "Tests findByEmail repository method"));
-            tests.add(createTestCase("Test user repository operations", testType, TestPriority.HIGH, "Tests user repository CRUD operations"));
-        } else if (className.equals("BookingRepository")) {
-            tests.add(createTestCase("Test booking repository queries", testType, TestPriority.HIGH, "Tests booking repository query methods"));
-            tests.add(createTestCase("Test booking date range queries", testType, TestPriority.MEDIUM, "Tests date range queries in booking repository"));
-        } else if (className.equals("ProjectService")) {
-            if (testType == TestType.UNIT) {
-                tests.add(createTestCase("Test project creation", testType, TestPriority.HIGH, "Tests project creation in ProjectService"));
-                tests.add(createTestCase("Test project retrieval", testType, TestPriority.HIGH, "Tests project retrieval methods"));
-                tests.add(createTestCase("Test project update", testType, TestPriority.HIGH, "Tests project update operations"));
-                tests.add(createTestCase("Test project deletion", testType, TestPriority.MEDIUM, "Tests project deletion functionality"));
-                tests.add(createTestCase("Test project validation", testType, TestPriority.HIGH, "Tests project data validation"));
-            } else if (testType == TestType.INTEGRATION) {
-                tests.add(createTestCase("Test project repository integration", testType, TestPriority.HIGH, "Tests project repository CRUD operations"));
-                tests.add(createTestCase("Test project with database transactions", testType, TestPriority.HIGH, "Tests project transactions and rollback"));
-                tests.add(createTestCase("Test project search and filtering", testType, TestPriority.MEDIUM, "Tests project search queries with filters"));
-                tests.add(createTestCase("Test project association with contributors", testType, TestPriority.HIGH, "Tests project-contributor relationships"));
-            }
-        } else if (className.equals("ContributorService")) {
-            if (testType == TestType.UNIT) {
-                tests.add(createTestCase("Test contributor assignment", testType, TestPriority.HIGH, "Tests contributor job assignment"));
-                tests.add(createTestCase("Test contributor unassignment", testType, TestPriority.HIGH, "Tests contributor job unassignment"));
-                tests.add(createTestCase("Test contributor creation", testType, TestPriority.HIGH, "Tests contributor creation"));
-                tests.add(createTestCase("Test contributor stats update", testType, TestPriority.MEDIUM, "Tests batch contributor stats update"));
-            } else if (testType == TestType.INTEGRATION) {
-                tests.add(createTestCase("Test contributor database operations", testType, TestPriority.HIGH, "Tests contributor repository integration"));
-                tests.add(createTestCase("Test contributor metrics calculation", testType, TestPriority.HIGH, "Tests contributor performance metrics"));
-                tests.add(createTestCase("Test contributor job queue processing", testType, TestPriority.MEDIUM, "Tests job queue integration with contributors"));
-                tests.add(createTestCase("Test contributor bulk operations", testType, TestPriority.HIGH, "Tests batch contributor updates and assignments"));
-            }
-        } else if (className.equals("WorkService")) {
-            if (testType == TestType.UNIT) {
-                tests.add(createTestCase("Test work item creation", testType, TestPriority.HIGH, "Tests work item creation in WorkService"));
-                tests.add(createTestCase("Test work item retrieval", testType, TestPriority.HIGH, "Tests work item retrieval methods"));
-                tests.add(createTestCase("Test work item update", testType, TestPriority.HIGH, "Tests work item update operations"));
-                tests.add(createTestCase("Test work item assignment", testType, TestPriority.HIGH, "Tests work item assignment to contributors"));
-                tests.add(createTestCase("Test work item validation", testType, TestPriority.MEDIUM, "Tests work item data validation"));
-            } else if (testType == TestType.INTEGRATION) {
-                tests.add(createTestCase("Test work repository integration", testType, TestPriority.HIGH, "Tests work repository CRUD operations"));
-                tests.add(createTestCase("Test work with database transactions", testType, TestPriority.HIGH, "Tests work transactions and rollback"));
-                tests.add(createTestCase("Test work search and filtering", testType, TestPriority.MEDIUM, "Tests work search queries with filters"));
-                tests.add(createTestCase("Test work status transitions", testType, TestPriority.HIGH, "Tests work status lifecycle management"));
-            }
-        }
-        
-        return tests;
-    }
-    
-    // All mock data removed - system now uses only real repository code analysis
     
     /**
      * Generate test cases using LLM based on code content and type
@@ -217,6 +127,18 @@ public class TestGenerationService {
                     createTestCase("Test user interface interactions", type, TestPriority.HIGH, "Tests UI components")
                 ));
                 break;
+            case PERFORMANCE:
+                fallbackTests.addAll(Arrays.asList(
+                    createTestCase("Test response time", type, TestPriority.HIGH, "Validates performance metrics"),
+                    createTestCase("Test load handling", type, TestPriority.HIGH, "Tests system under load")
+                ));
+                break;
+            case SECURITY:
+                fallbackTests.addAll(Arrays.asList(
+                    createTestCase("Test authentication", type, TestPriority.HIGH, "Validates authentication mechanisms"),
+                    createTestCase("Test authorization", type, TestPriority.HIGH, "Tests access control")
+                ));
+                break;
         }
         
         return fallbackTests;
@@ -242,24 +164,11 @@ public class TestGenerationService {
     }
     
     /**
-     * Get all generated tests - Filtered for Kepler-app services only
+     * Get all generated tests - Returns all real Kepler-app tests
      */
     public List<TestSuite> getAllTests() {
-        // Filter to show only Kepler-app services (ProjectService, ContributorService, and WorkService)
-        List<TestSuite> filtered = generatedTests.stream()
-                .filter(test -> {
-                    String filePath = test.getFilePath() != null ? test.getFilePath().toLowerCase() : "";
-                    String name = test.getName() != null ? test.getName().toLowerCase() : "";
-                    return filePath.contains("projectservice") || filePath.contains("project-service") ||
-                           filePath.contains("contributorservice") || filePath.contains("contributor-service") ||
-                           filePath.contains("workservice") || filePath.contains("work-service") ||
-                           name.contains("projectservice") || name.contains("contributorservice") || name.contains("workservice");
-                })
-                .collect(Collectors.toList());
-        
-        logger.info("📊 Filtered tests - Total in memory: {}, Kepler-app only: {}", 
-                   generatedTests.size(), filtered.size());
-        return filtered;
+        logger.info("📊 Returning all Kepler-app tests: {} test suites", generatedTests.size());
+        return new ArrayList<>(generatedTests);
     }
     
     /**
@@ -315,6 +224,142 @@ public class TestGenerationService {
         stats.put("byLanguage", byLanguage);
         
         return stats;
+    }
+    
+    /**
+     * Get tests aggregated by service (Project, Contributor, Work)
+     */
+    public List<com.testplatform.backend.dto.ServiceTestSummaryDTO> getTestsByService() {
+        Map<String, com.testplatform.backend.dto.ServiceTestSummaryDTO> serviceMap = new HashMap<>();
+        
+        for (TestSuite suite : generatedTests) {
+            String serviceName = extractServiceName(suite.getFilePath());
+            
+            // Get or create service summary
+            com.testplatform.backend.dto.ServiceTestSummaryDTO summary = serviceMap.computeIfAbsent(
+                serviceName, 
+                k -> createServiceSummary(k)
+            );
+            
+            // Aggregate metrics
+            summary.setTotalTestSuites(summary.getTotalTestSuites() + 1);
+            summary.setTotalTestCases(summary.getTotalTestCases() + (suite.getTotalTests() != null ? suite.getTotalTests() : 0));
+            summary.setPassedTests(summary.getPassedTests() + (suite.getPassedTests() != null ? suite.getPassedTests() : 0));
+            summary.setFailedTests(summary.getFailedTests() + (suite.getFailedTests() != null ? suite.getFailedTests() : 0));
+            summary.setTotalExecutionTime(summary.getTotalExecutionTime() + (suite.getExecutionTime() != null ? suite.getExecutionTime() : 0L));
+            
+            // Update last run
+            if (suite.getLastRun() != null && 
+                (summary.getLastRun() == null || suite.getLastRun().isAfter(summary.getLastRun()))) {
+                summary.setLastRun(suite.getLastRun());
+            }
+            
+            // Track tests by type
+            String typeName = suite.getType().name();
+            summary.getTestsByType().put(typeName, 
+                summary.getTestsByType().getOrDefault(typeName, 0) + (suite.getTotalTests() != null ? suite.getTotalTests() : 0));
+            summary.getSuitesByType().put(typeName,
+                summary.getSuitesByType().getOrDefault(typeName, 0) + 1);
+        }
+        
+        // Calculate derived metrics
+        for (com.testplatform.backend.dto.ServiceTestSummaryDTO summary : serviceMap.values()) {
+            int total = summary.getTotalTestCases();
+            int passed = summary.getPassedTests();
+            int failed = summary.getFailedTests();
+            
+            // Calculate pass rate
+            if (total > 0) {
+                summary.setPassRate((double) passed / total * 100.0);
+            } else {
+                summary.setPassRate(0.0);
+            }
+            
+            // Set pending tests
+            summary.setPendingTests(total - passed - failed);
+            
+            // Calculate average coverage
+            double avgCoverage = generatedTests.stream()
+                .filter(s -> extractServiceName(s.getFilePath()).equals(summary.getServiceName()))
+                .filter(s -> s.getCoverage() != null)
+                .mapToDouble(TestSuite::getCoverage)
+                .average()
+                .orElse(0.0);
+            summary.setAvgCoverage(avgCoverage);
+            
+            // Set overall status
+            if (failed > 0) {
+                summary.setOverallStatus(TestStatus.FAILED);
+            } else if (passed == total && total > 0) {
+                summary.setOverallStatus(TestStatus.PASSED);
+            } else {
+                summary.setOverallStatus(TestStatus.PENDING);
+            }
+        }
+        
+        logger.info("📊 Aggregated tests into {} services", serviceMap.size());
+        return new ArrayList<>(serviceMap.values());
+    }
+    
+    /**
+     * Extract service name from file path
+     */
+    private String extractServiceName(String filePath) {
+        if (filePath == null) return "Unknown Service";
+        
+        if (filePath.contains("project-service")) {
+            return "Project Service";
+        } else if (filePath.contains("contributor-service")) {
+            return "Contributor Service";
+        } else if (filePath.contains("work-service")) {
+            return "Work Service";
+        } else if (filePath.contains("api-gateway")) {
+            return "API Gateway";
+        } else if (filePath.contains("batchjob-service")) {
+            return "Batch Job Service";
+        }
+        
+        return "Unknown Service";
+    }
+    
+    /**
+     * Create initial service summary
+     */
+    private com.testplatform.backend.dto.ServiceTestSummaryDTO createServiceSummary(String serviceName) {
+        com.testplatform.backend.dto.ServiceTestSummaryDTO summary = 
+            new com.testplatform.backend.dto.ServiceTestSummaryDTO();
+        
+        summary.setServiceName(serviceName);
+        summary.setServiceId(serviceName.toLowerCase().replace(" ", "-"));
+        summary.setTotalTestSuites(0);
+        summary.setTotalTestCases(0);
+        summary.setPassedTests(0);
+        summary.setFailedTests(0);
+        summary.setPendingTests(0);
+        summary.setTotalExecutionTime(0L);
+        summary.setTestsByType(new HashMap<>());
+        summary.setSuitesByType(new HashMap<>());
+        
+        // Set descriptions
+        switch (serviceName) {
+            case "Project Service":
+                summary.setDescription("Manages project lifecycle, datasets, units, and job statistics");
+                summary.setRepository("kepler-app/project-service");
+                break;
+            case "Contributor Service":
+                summary.setDescription("Handles contributor management, crowd groups, and sync settings");
+                summary.setRepository("kepler-app/contributor-service");
+                break;
+            case "Work Service":
+                summary.setDescription("Manages work items, jobs, prompts, and crowd operations");
+                summary.setRepository("kepler-app/work-service");
+                break;
+            default:
+                summary.setDescription("Kepler App Service");
+                summary.setRepository("kepler-app");
+        }
+        
+        return summary;
     }
     
     // Helper methods

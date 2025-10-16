@@ -41,6 +41,20 @@ public class TestController {
     }
     
     /**
+     * GET /api/tests/services - Get tests aggregated by service
+     */
+    @GetMapping("/services")
+    public ResponseEntity<ApiResponse<List<com.testplatform.backend.dto.ServiceTestSummaryDTO>>> getTestsByService() {
+        List<com.testplatform.backend.dto.ServiceTestSummaryDTO> services = 
+            testGenerationService.getTestsByService();
+        
+        return ResponseEntity.ok(ApiResponse.success(
+            services, 
+            String.format("Aggregated tests for %d services", services.size())
+        ));
+    }
+    
+    /**
      * POST /api/tests/generate - Generate tests
      */
     @PostMapping("/generate")
