@@ -774,7 +774,7 @@ const Dashboard: React.FC = () => {
                     <Pie
                       data={(serviceTests || []).map((service: any) => ({
                         name: service.serviceName,
-                        shortName: service.serviceName.replace(' Service', ''),
+                        fullName: service.serviceName,
                         value: service.totalTestCases,
                         tests: service.totalTestCases,
                         passed: service.passedTests,
@@ -784,7 +784,7 @@ const Dashboard: React.FC = () => {
                       cx="50%"
                       cy="50%"
                       labelLine={true}
-                      label={(entry: any) => `${entry.shortName}: ${entry.value}`}
+                      label={(entry: any) => `${entry.fullName}: ${entry.value}`}
                       outerRadius={85}
                       fill="#8884d8"
                       dataKey="value"
