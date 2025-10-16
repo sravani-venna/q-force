@@ -23,7 +23,7 @@ app:
     window-ms: 900000  # 15 minutes
     max-requests: 100
   test-generation:
-    max-tests-per-file: 25
+    max-tests-per-file: 50
     default-timeout: 30000
     supported-languages:
       - java
@@ -49,7 +49,7 @@ app:
     auto-inline-comment: true
   git:
     enabled: true
-    repository-path: ${GIT_REPO_PATH:/Users/dnalla/Documents/APP-KEPLER/kepler-app}
+    repository-path: ${GIT_REPO_PATH:/Users/vnannuri/Documents/kepler-app}
   multi-repo:
     enabled: true
     default-repository: ${DEFAULT_REPO:kepler-app}
@@ -59,9 +59,9 @@ app:
       # Kepler App - Local Repository with Git Remote
       - id: kepler-app
         name: "Kepler App"
-        remote-url: git@github.com:Appen-International/kepler-app.git
-        path: /Users/dnalla/Documents/APP-KEPLER/kepler-app
-        branch: release
+        remote-url: https://github.com/Appen-International/kepler-app.git
+        path: /Users/vnannuri/Documents/kepler-app
+        branch: main
         language: java
         framework: spring-boot
         enabled: true

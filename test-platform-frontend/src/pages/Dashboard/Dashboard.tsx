@@ -31,6 +31,7 @@ import {
   Skeleton,
   LinearProgress,
 } from '@mui/material';
+import axios from 'axios';
 import { dashboardService, testSuiteService, testExecutionService } from '../../services/apiService';
 import {
   LineChart,
@@ -59,6 +60,8 @@ import {
   Close as CloseIcon,
   Visibility as VisibilityIcon,
 } from '@mui/icons-material';
+
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
 // Enhanced chart colors with gradients
 const CHART_COLORS = ['#1976d2', '#dc004e', '#9c27b0', '#2e7d32', '#ed6c02'];
@@ -196,11 +199,25 @@ const Dashboard: React.FC = () => {
   const executeCodebaseTests = async () => {
     try {
       setExecutingTests(true);
-      console.log('🧪 Starting codebase-wide test execution...');
-      console.log('📊 Test suites to execute:', testSuites);
+      console.log('🔄 Regenerating fresh test cases from current codebase...');
+      
+      // Step 1: Regenerate all test cases
+      const regenerateResponse = await axios.post(`${API_BASE_URL}/api/tests/regenerate`);
+      if (regenerateResponse.data.success) {
+        console.log('✅ Test cases regenerated:', regenerateResponse.data.data);
+        console.log(`📊 Generated ${regenerateResponse.data.data.totalSuites} test suites with ${regenerateResponse.data.data.totalTestCases} test cases`);
+      }
+      
+      // Step 2: Fetch the newly generated test suites
+      const suitesResponse = await testSuiteService.getAll();
+      const freshTestSuites = suitesResponse.data || [];
+      setTestSuites(freshTestSuites);
+      console.log('🆕 Fresh test suites loaded:', freshTestSuites);
+      
+      console.log('🧪 Starting codebase-wide test execution with fresh tests...');
       
       // Mark all test suites as running
-      const runningSuites = testSuites.map(suite => ({
+      const runningSuites = freshTestSuites.map((suite: any) => ({
         ...suite,
         status: 'RUNNING',
         startedAt: new Date().toISOString(),
@@ -210,7 +227,7 @@ const Dashboard: React.FC = () => {
       console.log('🏃‍♂️ Marked test suites as running:', runningSuites);
       
       // Execute tests for all test suites
-      const executionPromises = testSuites.map(async (suite, index) => {
+      const executionPromises = freshTestSuites.map(async (suite: any, index: number) => {
         try {
           console.log(`🚀 Executing test suite ${suite.id} (${suite.name})...`);
           const result = await testExecutionService.start(suite.id);
@@ -241,7 +258,7 @@ const Dashboard: React.FC = () => {
           
           // Update running test suites with latest status
           const stillRunning = runningSuites
-            .map(runningSuite => {
+            .map((runningSuite: any) => {
               const updated = updatedSuites.find((s: any) => s.id === runningSuite.id);
               if (updated) {
                 return {

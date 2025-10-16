@@ -129,6 +129,22 @@ public class TestController {
         }
     }
     
+    /**
+     * POST /api/tests/regenerate - Regenerate all test cases from current codebase
+     */
+    @PostMapping("/regenerate")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> regenerateTests() {
+        try {
+            CompletableFuture<Map<String, Object>> regenerationFuture = testGenerationService.regenerateAllTests();
+            Map<String, Object> result = regenerationFuture.get();
+            
+            return ResponseEntity.ok(ApiResponse.success(result, "Test cases regenerated successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.status(500)
+                    .body(ApiResponse.error("Failed to regenerate tests: " + e.getMessage()));
+        }
+    }
+    
     // Inner classes for request/response
     public static class GenerateTestsRequest {
         private String code;

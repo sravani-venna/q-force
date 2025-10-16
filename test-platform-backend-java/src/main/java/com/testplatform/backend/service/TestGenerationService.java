@@ -288,6 +288,34 @@ public class TestGenerationService {
     }
     
     /**
+     * Regenerate all test cases from scratch
+     */
+    public CompletableFuture<Map<String, Object>> regenerateAllTests() {
+        return CompletableFuture.supplyAsync(() -> {
+            logger.info("🔄 Regenerating all test cases from current codebase...");
+            
+            // Clear existing tests
+            generatedTests.clear();
+            nextTestId = 1;
+            
+            // Regenerate from Spring Boot code
+            generateRealSpringBootTests();
+            
+            Map<String, Object> result = new HashMap<>();
+            result.put("totalSuites", generatedTests.size());
+            result.put("totalTestCases", generatedTests.stream()
+                    .mapToInt(suite -> suite.getTestCases() != null ? suite.getTestCases().size() : 0)
+                    .sum());
+            result.put("message", "Successfully regenerated test cases");
+            
+            logger.info("✅ Regeneration complete: {} test suites with {} total test cases", 
+                    result.get("totalSuites"), result.get("totalTestCases"));
+            
+            return result;
+        });
+    }
+    
+    /**
      * Get test generation statistics
      */
     public Map<String, Object> getTestStats() {

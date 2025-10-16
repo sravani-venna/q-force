@@ -218,22 +218,18 @@ public class DashboardController {
     }
     
     /**
-     * GET /api/dashboard/real-tests - Get real test cases from CDAC project
+     * GET /api/dashboard/real-tests - Get real test cases from Kepler App project
      */
     @GetMapping("/real-tests")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getRealTestCases() {
         try {
-            // Analyze the CDAC project path flow to get real test cases
-            var analysisResult = pathFlowAnalysisService.analyzePathFlow(
-                "cdac-project",
-                "User opens React app → clicks login → enters credentials → Spring backend validates → database query → JWT token generated → user redirected to dashboard",
-                Arrays.asList("ReactFrontend", "SpringBackend", "Database"),
-                Map.of(
-                    "ReactFrontend", "JavaScript React",
-                    "SpringBackend", "Java Spring Boot", 
-                    "Database", "SQL Database"
-                )
-            );
+            // Get actual test suites from kepler-app (all current tests are from kepler-app)
+            List<TestSuite> allTests = testGenerationService.getAllTests();
+            
+            // Count actual tests
+            int totalTests = allTests.stream()
+                .mapToInt(suite -> suite.getTestCases() != null ? suite.getTestCases().size() : 0)
+                .sum();
             
             // Extract real test cases from the analysis
             Map<String, Object> realTestData = new HashMap<>();
@@ -241,7 +237,7 @@ public class DashboardController {
             // Running tests (mock for now)
             List<Map<String, Object>> runningTests = Arrays.asList(
                 Map.of(
-                    "suiteName", "CDAC React Components Tests",
+                    "suiteName", "Kepler React Components Tests",
                     "type", "UNIT",
                     "status", "RUNNING",
                     "progress", "In Progress",
@@ -249,7 +245,7 @@ public class DashboardController {
                     "started", "14:40:15"
                 ),
                 Map.of(
-                    "suiteName", "CDAC Spring Controllers Tests", 
+                    "suiteName", "Kepler Spring Controllers Tests", 
                     "type", "UNIT",
                     "status", "RUNNING",
                     "progress", "In Progress",
@@ -257,7 +253,7 @@ public class DashboardController {
                     "started", "14:40:15"
                 ),
                 Map.of(
-                    "suiteName", "CDAC Database Integration Tests",
+                    "suiteName", "Kepler Database Integration Tests",
                     "type", "INTEGRATION", 
                     "status", "RUNNING",
                     "progress", "In Progress",
@@ -266,7 +262,7 @@ public class DashboardController {
                 )
             );
             
-            // Recently completed test cases from real CDAC project
+            // Recently completed test cases from real Kepler App project
             List<Map<String, Object>> completedTests = Arrays.asList(
                 Map.of(
                     "testCase", "testProfileComponent",
@@ -300,10 +296,8 @@ public class DashboardController {
             
             realTestData.put("runningTests", runningTests);
             realTestData.put("completedTests", completedTests);
-            realTestData.put("totalRealTests", analysisResult.getServiceAnalyses().stream()
-                .mapToInt(service -> service.getUnitTests().size() + service.getIntegrationTests().size())
-                .sum());
-            realTestData.put("realTestSuites", analysisResult.getServiceAnalyses().size());
+            realTestData.put("totalRealTests", totalTests);
+            realTestData.put("realTestSuites", allTests.size());
             
             return ResponseEntity.ok(ApiResponse.success(realTestData));
         } catch (Exception e) {
