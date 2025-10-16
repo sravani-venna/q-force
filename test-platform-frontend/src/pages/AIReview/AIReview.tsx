@@ -18,6 +18,7 @@ import {
   Checkbox,
   FormControlLabel,
   LinearProgress,
+  Tooltip,
 } from '@mui/material';
 import {
   Send as SendIcon,
@@ -245,22 +246,38 @@ const AIReview: React.FC = () => {
           </Typography>
           
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
-            <TextField
-              fullWidth
-              placeholder="https://github.com/owner/repo/pull/123"
-              value={prUrl}
-              onChange={(e) => setPrUrl(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter' && !loading) {
-                  handleReview();
-                }
-              }}
-              disabled={loading}
-              variant="outlined"
-              size="medium"
-              error={!!error && !reviewResult}
-              helperText={error && !reviewResult ? error : ''}
-            />
+            <Tooltip 
+              title="Example: https://github.com/owner/repo/pull/123" 
+              arrow
+              placement="top"
+              enterDelay={300}
+            >
+              <TextField
+                fullWidth
+                placeholder="Paste GitHub PR URL here..."
+                value={prUrl}
+                onChange={(e) => setPrUrl(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && !loading) {
+                    handleReview();
+                  }
+                }}
+                disabled={loading}
+                variant="outlined"
+                size="medium"
+                error={!!error && !reviewResult}
+                helperText={error && !reviewResult ? error : ''}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                      borderColor: 'primary.main',
+                    },
+                  },
+                }}
+              />
+            </Tooltip>
             <Button
               variant="contained"
               size="large"

@@ -586,7 +586,7 @@ const Dashboard: React.FC = () => {
 
       {/* Main Metrics Row */}
       <Grid container spacing={4} sx={{ mb: 4, position: 'relative', zIndex: 1 }}>
-        <Grid item xs={12} sm={6} lg={3}>
+        <Grid item xs={12} sm={6} lg={4}>
           <StatCard
             title="Total Tests"
             value={dashboardData?.totalTests?.toLocaleString() || '0'}
@@ -597,7 +597,7 @@ const Dashboard: React.FC = () => {
             onClick={() => setTestDetailsOpen(true)}
           />
         </Grid>
-        <Grid item xs={12} sm={6} lg={3}>
+        <Grid item xs={12} sm={6} lg={4}>
           <StatCard
             title="Pass Rate"
             value={`${passRate}%`}
@@ -608,7 +608,7 @@ const Dashboard: React.FC = () => {
             onClick={() => fetchDetailedTestCases('PASSED')}
           />
         </Grid>
-        <Grid item xs={12} sm={6} lg={3}>
+        <Grid item xs={12} sm={6} lg={4}>
           <StatCard
             title="Failed Tests"
             value={dashboardData?.failedTests || 0}
@@ -618,7 +618,19 @@ const Dashboard: React.FC = () => {
             onClick={() => fetchDetailedTestCases('FAILED')}
           />
         </Grid>
-        <Grid item xs={12} sm={6} lg={3}>
+      </Grid>
+
+      {/* Test Metrics Row - 3 Columns */}
+      <Grid container spacing={4} sx={{ mb: 4, position: 'relative', zIndex: 1 }}>
+        <Grid item xs={12} sm={6} lg={4}>
+          <StatCard
+            title="Test Suites Generated"
+            value={dashboardData?.generatedTestSuites || 0}
+            icon={<AutoAwesomeIcon sx={{ fontSize: 40 }} />}
+            color="#ed6c02"
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} lg={4}>
           <StatCard
             title="Running Tests"
             value={runningTestSuites.length}
@@ -628,35 +640,7 @@ const Dashboard: React.FC = () => {
             onClick={() => setRunningTestsOpen(true)}
           />
         </Grid>
-      </Grid>
-
-      {/* PR Metrics Row */}
-      <Grid container spacing={4} sx={{ mb: 4, position: 'relative', zIndex: 1 }}>
-        <Grid item xs={12} sm={6} lg={3}>
-          <StatCard
-            title="Active PRs"
-            value={dashboardData?.activePRs || 0}
-            icon={<GitMergeIcon sx={{ fontSize: 40 }} />}
-            color="#1976d2"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} lg={3}>
-          <StatCard
-            title="Merged PRs"
-            value={dashboardData?.mergedPRs || 0}
-            icon={<CheckCircleIcon sx={{ fontSize: 40 }} />}
-            color="#2e7d32"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} lg={3}>
-          <StatCard
-            title="Test Suites Generated"
-            value={dashboardData?.generatedTestSuites || 0}
-            icon={<AutoAwesomeIcon sx={{ fontSize: 40 }} />}
-            color="#ed6c02"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} lg={3}>
+        <Grid item xs={12} sm={6} lg={4}>
           <StatCard
             title="Coverage"
             value={`${coveragePercentage}%`}
@@ -774,7 +758,7 @@ const Dashboard: React.FC = () => {
                     <Pie
                       data={(serviceTests || []).map((service: any) => ({
                         name: service.serviceName,
-                        fullName: service.serviceName,
+                        shortName: service.serviceName.replace(' Service', ''),
                         value: service.totalTestCases,
                         tests: service.totalTestCases,
                         passed: service.passedTests,
@@ -784,7 +768,7 @@ const Dashboard: React.FC = () => {
                       cx="50%"
                       cy="50%"
                       labelLine={true}
-                      label={(entry: any) => `${entry.fullName}: ${entry.value}`}
+                      label={(entry: any) => `${entry.shortName}: ${entry.value}`}
                       outerRadius={85}
                       fill="#8884d8"
                       dataKey="value"
