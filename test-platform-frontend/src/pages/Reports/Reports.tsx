@@ -328,7 +328,7 @@ const Reports: React.FC = () => {
     return (serviceTests || [])
       .map((service: any, index: number) => ({
         name: service.serviceName,
-        fullName: service.serviceName,
+        shortName: service.serviceName.replace(' Service', ''),
         value: service.totalTestCases || 0,
         color: colors[index % colors.length],
         passed: service.passedTests || 0,
@@ -591,7 +591,7 @@ const Reports: React.FC = () => {
                       cx="50%"
                       cy="50%"
                       labelLine={true}
-                      label={({ fullName, percent }) => `${fullName}: ${(percent * 100).toFixed(0)}%`}
+                      label={({ shortName, percent }) => `${shortName}: ${(percent * 100).toFixed(0)}%`}
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="value"
