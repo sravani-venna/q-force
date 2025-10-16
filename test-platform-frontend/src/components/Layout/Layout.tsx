@@ -16,7 +16,6 @@ import {
   Avatar,
   Menu,
   MenuItem,
-  Badge,
   Divider,
 } from '@mui/material';
 import {
@@ -25,7 +24,6 @@ import {
   Code as CodeIcon,
   Assessment as AssessmentIcon,
   Settings as SettingsIcon,
-  Notifications as NotificationsIcon,
   AccountCircle as AccountCircleIcon,
   Logout as LogoutIcon,
   SmartToy as SmartToyIcon,
@@ -171,12 +169,6 @@ const Layout: React.FC = () => {
           </Typography>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <IconButton color="inherit">
-              <Badge badgeContent={3} color="error">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
-
             <IconButton onClick={handleUserMenuOpen} sx={{ p: 0 }}>
               <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>
                 {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
