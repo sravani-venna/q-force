@@ -48,6 +48,7 @@ const Reports: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [testSuites, setTestSuites] = useState<any[]>([]);
+  const [serviceTests, setServiceTests] = useState<any[]>([]);
   const [downloadAnchorEl, setDownloadAnchorEl] = useState<null | HTMLElement>(null);
   const downloadMenuOpen = Boolean(downloadAnchorEl);
 
@@ -57,18 +58,25 @@ const Reports: React.FC = () => {
 
   const fetchReportsData = async () => {
     try {
-      const [statsRes, suitesRes] = await Promise.all([
+      const [statsRes, suitesRes, servicesRes] = await Promise.all([
         fetch('http://localhost:8080/api/dashboard/stats'),
         fetch('http://localhost:8080/api/test-suites'),
+        fetch('http://localhost:8080/api/tests/services'),
       ]);
 
       const statsData = await statsRes.json();
       const suitesData = await suitesRes.json();
+      const servicesData = await servicesRes.json();
 
-      console.log('📊 Reports data fetched:', { stats: statsData.data, suites: suitesData.data });
+      console.log('📊 Reports data fetched:', { 
+        stats: statsData.data, 
+        suites: suitesData.data,
+        services: servicesData.data 
+      });
 
       setDashboardData(statsData.data);
       setTestSuites(suitesData.data || []);
+      setServiceTests(servicesData.data || []);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching reports data:', error);
@@ -297,36 +305,14 @@ const Reports: React.FC = () => {
     },
   ];
 
-  // Performance metrics data - Group by service (combine UNIT and INTEGRATION)
-  const performanceData = (() => {
-    const serviceGroups: { [key: string]: { passed: number; failed: number; tests: number } } = {};
-    
-    testSuites.forEach((suite) => {
-      // Extract service name (e.g., "ProjectService" from "ProjectService UNIT Tests")
-      const serviceName = suite.name
-        ?.replace(/\s*(UNIT|INTEGRATION)\s*Tests?/gi, '')
-        ?.trim();
-      
-      if (serviceName) {
-        if (!serviceGroups[serviceName]) {
-          serviceGroups[serviceName] = { passed: 0, failed: 0, tests: 0 };
-        }
-        
-        const passed = suite.testCases?.filter((t: any) => t.status === 'PASSED').length || 0;
-        const failed = suite.testCases?.filter((t: any) => t.status === 'FAILED').length || 0;
-        const tests = suite.testCases?.length || 0;
-        
-        serviceGroups[serviceName].passed += passed;
-        serviceGroups[serviceName].failed += failed;
-        serviceGroups[serviceName].tests += tests;
-      }
-    });
-    
-    return Object.entries(serviceGroups).map(([name, metrics]) => ({
-      name,
-      ...metrics,
-    }));
-  })();
+  // Performance metrics data - Use service-level aggregated data
+  const performanceData = (serviceTests || []).map((service: any) => ({
+    name: service.serviceName,
+    passed: service.passedTests || 0,
+    failed: service.failedTests || 0,
+    tests: service.totalTestCases || 0,
+    passRate: service.passRate || 0,
+  }));
 
   // Execution time trends
   const trendData = dashboardData?.trendsData?.map((trend: any) => ({
@@ -336,30 +322,20 @@ const Reports: React.FC = () => {
     total: trend.passed + trend.failed,
   })) || [];
 
-  // Test suite distribution for pie chart - Group by service (combine UNIT and INTEGRATION)
+  // Test suite distribution for pie chart - Use service-level data
   const suiteDistribution = (() => {
-    const serviceGroups: { [key: string]: number } = {};
-    
-    testSuites.forEach((suite) => {
-      // Extract service name (e.g., "ProjectService" from "ProjectService UNIT Tests")
-      const serviceName = suite.name
-        ?.replace(/\s*(UNIT|INTEGRATION)\s*Tests?/gi, '')
-        ?.trim();
-      
-      if (serviceName) {
-        const testCount = suite.testCases?.length || 0;
-        serviceGroups[serviceName] = (serviceGroups[serviceName] || 0) + testCount;
-      }
-    });
-    
     const colors = ['#2196f3', '#4caf50', '#ff9800', '#f44336', '#9c27b0', '#00bcd4', '#8bc34a'];
-    return Object.entries(serviceGroups)
-      .map(([name, value], index) => ({
-        name,
-        value,
+    return (serviceTests || [])
+      .map((service: any, index: number) => ({
+        name: service.serviceName,
+        shortName: service.serviceName.replace(' Service', ''),
+        value: service.totalTestCases || 0,
         color: colors[index % colors.length],
+        passed: service.passedTests || 0,
+        failed: service.failedTests || 0,
+        passRate: service.passRate || 0,
       }))
-      .filter(s => s.value > 0);
+      .filter((s: any) => s.value > 0);
   })();
 
   const avgExecutionTime = dashboardData?.executionTime 
@@ -599,13 +575,13 @@ const Reports: React.FC = () => {
           </Card>
         </Grid>
 
-        {/* Test Suite Distribution */}
+        {/* Service-Wise Test Distribution */}
         <Grid item xs={12} md={6}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <AssessmentIcon color="primary" />
-                Test Suite Distribution
+                Service-Wise Test Distribution
               </Typography>
               <Box sx={{ height: 300 }}>
                 <ResponsiveContainer width="100%" height="100%">
@@ -614,8 +590,8 @@ const Reports: React.FC = () => {
                       data={suiteDistribution}
                       cx="50%"
                       cy="50%"
-                      labelLine={false}
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      labelLine={true}
+                      label={({ shortName, percent }) => `${shortName}: ${(percent * 100).toFixed(0)}%`}
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="value"
@@ -624,7 +600,15 @@ const Reports: React.FC = () => {
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip />
+                    <Tooltip 
+                      formatter={(value: any, name: any, props: any) => {
+                        const entry = props.payload;
+                        return [
+                          `${value} tests (${entry.passed} passed, ${entry.failed} failed) - ${entry.passRate?.toFixed(1)}% pass rate`,
+                          entry.name
+                        ];
+                      }}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
               </Box>

@@ -178,6 +178,7 @@ const StatCard: React.FC<{
 const Dashboard: React.FC = () => {
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [testSuites, setTestSuites] = useState<any[]>([]);
+  const [serviceTests, setServiceTests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [dataSource, setDataSource] = useState<'api' | 'fallback'>('api');
@@ -334,15 +335,17 @@ const Dashboard: React.FC = () => {
         console.error('❌ Direct API call failed:', directError);
       }
       
-      // Fetch dashboard stats, test suites, and real test cases in parallel
-      const [statsResponse, suitesResponse, realTestCasesResponse] = await Promise.all([
+      // Fetch dashboard stats, test suites, service-level tests, and real test cases in parallel
+      const [statsResponse, suitesResponse, servicesResponse, realTestCasesResponse] = await Promise.all([
         dashboardService.getStats(),
         testSuiteService.getAll(),
+        testSuiteService.getServiceLevelTests(),
         dashboardService.getRealTestCases()
       ]);
 
       console.log('📊 Stats response:', statsResponse);
       console.log('📝 Suites response:', suitesResponse);
+      console.log('🏢 Services response:', servicesResponse);
       console.log('🎯 Real test cases response:', realTestCasesResponse);
 
       if (statsResponse && statsResponse.success) {
@@ -359,6 +362,13 @@ const Dashboard: React.FC = () => {
         console.log('✅ Test suites set from API:', suitesResponse.data);
       } else {
         console.warn('⚠️ Suites response not successful:', suitesResponse);
+      }
+
+      if (servicesResponse && servicesResponse.success) {
+        setServiceTests(servicesResponse.data);
+        console.log('✅ Service-level tests set from API:', servicesResponse.data);
+      } else {
+        console.warn('⚠️ Services response not successful:', servicesResponse);
       }
 
       if (realTestCasesResponse && realTestCasesResponse.success) {
@@ -756,56 +766,33 @@ const Dashboard: React.FC = () => {
                   mb: 3
                 }}
               >
-                🥧 Test Suite Distribution
+                🏢 Service-Wise Test Distribution
               </Typography>
               <Box sx={{ height: 320, p: 2, backgroundColor: 'white', borderRadius: 1 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart style={{ backgroundColor: 'white' }}>
                     <Pie
-                      data={(() => {
-                        // Group test suites by service name
-                        const serviceGroups: { [key: string]: number } = {};
-                        
-                        testSuites?.forEach((suite: any) => {
-                          // Extract service name (e.g., "ProjectService" from "ProjectService UNIT Tests")
-                          const serviceName = suite.name
-                            ?.replace(/\s*(UNIT|INTEGRATION)\s*Tests?/gi, '')
-                            ?.trim();
-                          
-                          if (serviceName) {
-                            const testCount = suite.testCases ? suite.testCases.length : (suite.testCount || 0);
-                            serviceGroups[serviceName] = (serviceGroups[serviceName] || 0) + testCount;
-                          }
-                        });
-                        
-                        // Convert to array format for chart
-                        return Object.entries(serviceGroups).map(([name, count]) => ({
-                          name,
-                          value: count,
-                          tests: count
-                        }));
-                      })()}
+                      data={(serviceTests || []).map((service: any) => ({
+                        name: service.serviceName,
+                        shortName: service.serviceName.replace(' Service', ''),
+                        value: service.totalTestCases,
+                        tests: service.totalTestCases,
+                        passed: service.passedTests,
+                        failed: service.failedTests,
+                        passRate: service.passRate
+                      }))}
                       cx="50%"
                       cy="50%"
-                      labelLine={false}
-                      label={false}
-                      outerRadius={80}
+                      labelLine={true}
+                      label={(entry: any) => `${entry.shortName}: ${entry.value}`}
+                      outerRadius={85}
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {(() => {
-                        const serviceGroups: { [key: string]: number } = {};
-                        testSuites?.forEach((suite: any) => {
-                          const serviceName = suite.name?.replace(/\s*(UNIT|INTEGRATION)\s*Tests?/gi, '')?.trim();
-                          if (serviceName) {
-                            serviceGroups[serviceName] = (serviceGroups[serviceName] || 0) + 1;
-                          }
-                        });
+                      {(serviceTests || []).map((entry: any, index: number) => {
                         const colors = ['#4caf50', '#2196f3', '#ff9800', '#f44336', '#9c27b0', '#00bcd4'];
-                        return Object.keys(serviceGroups).map((key, index) => (
-                          <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
-                        ));
-                      })()}
+                        return <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />;
+                      })}
                     </Pie>
                     <Tooltip 
                       contentStyle={{
@@ -815,19 +802,27 @@ const Dashboard: React.FC = () => {
                         color: 'black',
                         boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
                       }}
-                      formatter={(value: any, name: any, props: any) => [
-                        `${value} tests`, 
-                        props.payload.name
-                      ]}
+                      formatter={(value: any, name: any, props: any) => {
+                        const payload = props.payload;
+                        return [
+                          <div key="tooltip" style={{ color: 'black' }}>
+                            <div>{`${value} Total Tests`}</div>
+                            <div style={{ color: '#4caf50' }}>{`${payload.passed} Passed (${payload.passRate?.toFixed(1)}%)`}</div>
+                            <div style={{ color: '#f44336' }}>{`${payload.failed} Failed`}</div>
+                          </div>,
+                          payload.name
+                        ];
+                      }}
                     />
                     <Legend 
                       verticalAlign="bottom" 
-                      height={80}
+                      height={60}
                       formatter={(value: any) => value}
                       wrapperStyle={{ 
-                        fontSize: '12px', 
+                        fontSize: '11px', 
                         padding: '5px',
-                        color: 'rgba(0,0,0,0.6)'
+                        color: 'rgba(0,0,0,0.7)',
+                        fontWeight: 500
                       }}
                       layout="horizontal"
                     />
@@ -1246,23 +1241,28 @@ const Dashboard: React.FC = () => {
                 </TableHead>
                 <TableBody>
                   {(() => {
-                    // Extract all test cases from completed test suites
+                    // Extract all test cases from test suites (both PASSED and FAILED are considered completed)
                     const completedTestCases: any[] = [];
                     testSuites
-                      .filter(suite => suite.status === 'COMPLETED' && suite.testCases && suite.testCases.length > 0)
+                      .filter(suite => 
+                        (suite.status === 'PASSED' || suite.status === 'FAILED' || suite.status === 'COMPLETED') && 
+                        suite.testCases && 
+                        suite.testCases.length > 0
+                      )
                       .forEach(suite => {
                         suite.testCases.forEach((testCase: any) => {
                           completedTestCases.push({
                             ...testCase,
                             suiteName: suite.name,
                             suiteType: suite.type,
-                            lastRun: suite.lastRun
+                            lastRun: suite.lastRun || testCase.executedAt
                           });
                         });
                       });
                     
                     // Sort by most recent and take top 10
                     const recentTests = completedTestCases
+                      .filter(tc => tc.status === 'PASSED' || tc.status === 'FAILED')
                       .sort((a, b) => {
                         if (!a.lastRun) return 1;
                         if (!b.lastRun) return -1;
@@ -1275,7 +1275,7 @@ const Dashboard: React.FC = () => {
                         <TableRow>
                           <TableCell colSpan={5} align="center">
                             <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
-                              No completed test cases yet. Run tests to see results here.
+                              No completed test cases yet. Test suites contain {completedTestCases.length} test cases. Run tests to see results here.
                             </Typography>
                           </TableCell>
                         </TableRow>
