@@ -9,6 +9,11 @@ import {
   Paper,
   Chip,
   Stack,
+  Button,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
 } from '@mui/material';
 import {
   PieChart,
@@ -32,12 +37,19 @@ import {
   Speed as SpeedIcon,
   CheckCircle as CheckCircleIcon,
   Assessment as AssessmentIcon,
+  Download as DownloadIcon,
+  ArrowDropDown as ArrowDropDownIcon,
+  Description as DescriptionIcon,
+  TableChart as TableChartIcon,
+  PictureAsPdf as PictureAsPdfIcon,
 } from '@mui/icons-material';
 
 const Reports: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [testSuites, setTestSuites] = useState<any[]>([]);
+  const [downloadAnchorEl, setDownloadAnchorEl] = useState<null | HTMLElement>(null);
+  const downloadMenuOpen = Boolean(downloadAnchorEl);
 
   useEffect(() => {
     fetchReportsData();
@@ -47,11 +59,13 @@ const Reports: React.FC = () => {
     try {
       const [statsRes, suitesRes] = await Promise.all([
         fetch('http://localhost:8080/api/dashboard/stats'),
-        fetch('http://localhost:8080/api/tests/suites'),
+        fetch('http://localhost:8080/api/test-suites'),
       ]);
 
       const statsData = await statsRes.json();
       const suitesData = await suitesRes.json();
+
+      console.log('📊 Reports data fetched:', { stats: statsData.data, suites: suitesData.data });
 
       setDashboardData(statsData.data);
       setTestSuites(suitesData.data || []);
@@ -60,6 +74,203 @@ const Reports: React.FC = () => {
       console.error('Error fetching reports data:', error);
       setLoading(false);
     }
+  };
+
+  const handleDownloadClick = (event: React.MouseEvent<HTMLElement>) => {
+    setDownloadAnchorEl(event.currentTarget);
+  };
+
+  const handleDownloadClose = () => {
+    setDownloadAnchorEl(null);
+  };
+
+  const downloadJSON = () => {
+    const reportData = {
+      timestamp: new Date().toISOString(),
+      summary: {
+        totalTests: dashboardData?.totalTests || 0,
+        passedTests: dashboardData?.passedTests || 0,
+        failedTests: dashboardData?.failedTests || 0,
+        passRate: `${((dashboardData?.passedTests || 0) / (dashboardData?.totalTests || 1) * 100).toFixed(1)}%`,
+        executionTime: `${(dashboardData?.executionTime / 1000).toFixed(2)}s`,
+        generatedTestSuites: dashboardData?.generatedTestSuites || 0,
+      },
+      testSuites: testSuites.map(suite => ({
+        id: suite.id,
+        name: suite.name,
+        type: suite.type,
+        status: suite.status,
+        testCases: suite.testCases?.length || 0,
+        passed: suite.testCases?.filter((t: any) => t.status === 'PASSED').length || 0,
+        failed: suite.testCases?.filter((t: any) => t.status === 'FAILED').length || 0,
+        pending: suite.testCases?.filter((t: any) => t.status === 'PENDING').length || 0,
+      })),
+      trends: dashboardData?.trendsData || [],
+    };
+
+    const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `test-report-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    handleDownloadClose();
+  };
+
+  const downloadCSV = () => {
+    const totalTests = dashboardData?.totalTests || 0;
+    const passedTests = dashboardData?.passedTests || 0;
+    const failedTests = dashboardData?.failedTests || 0;
+    const passRate = ((passedTests / (totalTests || 1)) * 100).toFixed(1);
+
+    let csvContent = 'Test Report\n\n';
+    csvContent += 'Summary\n';
+    csvContent += 'Metric,Value\n';
+    csvContent += `Total Tests,${totalTests}\n`;
+    csvContent += `Passed Tests,${passedTests}\n`;
+    csvContent += `Failed Tests,${failedTests}\n`;
+    csvContent += `Pass Rate,${passRate}%\n`;
+    csvContent += `Avg Execution Time,${(dashboardData?.executionTime / 1000).toFixed(2)}s\n`;
+    csvContent += `Total Test Suites,${testSuites.length}\n\n`;
+
+    csvContent += 'Test Suites\n';
+    csvContent += 'ID,Name,Type,Status,Total Tests,Passed,Failed,Pending\n';
+    testSuites.forEach(suite => {
+      const passed = suite.testCases?.filter((t: any) => t.status === 'PASSED').length || 0;
+      const failed = suite.testCases?.filter((t: any) => t.status === 'FAILED').length || 0;
+      const pending = suite.testCases?.filter((t: any) => t.status === 'PENDING').length || 0;
+      const total = suite.testCases?.length || 0;
+      csvContent += `${suite.id},"${suite.name}",${suite.type},${suite.status},${total},${passed},${failed},${pending}\n`;
+    });
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `test-report-${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    handleDownloadClose();
+  };
+
+  const downloadPDF = () => {
+    // For PDF, we'll create an HTML report and open it in a new window for printing
+    const totalTests = dashboardData?.totalTests || 0;
+    const passedTests = dashboardData?.passedTests || 0;
+    const failedTests = dashboardData?.failedTests || 0;
+    const passRate = ((passedTests / (totalTests || 1)) * 100).toFixed(1);
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Test Report - ${new Date().toLocaleDateString()}</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 40px; color: #333; }
+          h1 { color: #2196f3; border-bottom: 3px solid #2196f3; padding-bottom: 10px; }
+          h2 { color: #666; margin-top: 30px; }
+          .summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 20px 0; }
+          .summary-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                          color: white; padding: 20px; border-radius: 8px; }
+          .summary-card h3 { margin: 0; font-size: 32px; }
+          .summary-card p { margin: 5px 0 0 0; opacity: 0.9; }
+          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+          th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+          th { background-color: #2196f3; color: white; }
+          tr:hover { background-color: #f5f5f5; }
+          .status-passed { color: #4caf50; font-weight: bold; }
+          .status-failed { color: #f44336; font-weight: bold; }
+          .status-pending { color: #ff9800; font-weight: bold; }
+          .footer { margin-top: 50px; text-align: center; color: #999; font-size: 12px; }
+          @media print {
+            .no-print { display: none; }
+          }
+        </style>
+      </head>
+      <body>
+        <h1>🧪 Test Execution Report</h1>
+        <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
+        
+        <h2>📊 Summary</h2>
+        <div class="summary">
+          <div class="summary-card">
+            <h3>${passRate}%</h3>
+            <p>Pass Rate</p>
+          </div>
+          <div class="summary-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+            <h3>${(dashboardData?.executionTime / 1000).toFixed(2)}s</h3>
+            <p>Avg Execution Time</p>
+          </div>
+          <div class="summary-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+            <h3>${totalTests}</h3>
+            <p>Total Tests</p>
+          </div>
+        </div>
+
+        <h2>📋 Test Results by Suite</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Suite Name</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Total</th>
+              <th>Passed</th>
+              <th>Failed</th>
+              <th>Pending</th>
+              <th>Pass Rate</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${testSuites.map(suite => {
+              const passed = suite.testCases?.filter((t: any) => t.status === 'PASSED').length || 0;
+              const failed = suite.testCases?.filter((t: any) => t.status === 'FAILED').length || 0;
+              const pending = suite.testCases?.filter((t: any) => t.status === 'PENDING').length || 0;
+              const total = suite.testCases?.length || 0;
+              const suitePassRate = total > 0 ? ((passed / total) * 100).toFixed(1) : '0';
+              return `
+                <tr>
+                  <td>${suite.name}</td>
+                  <td>${suite.type}</td>
+                  <td class="status-${suite.status?.toLowerCase()}">${suite.status}</td>
+                  <td>${total}</td>
+                  <td class="status-passed">${passed}</td>
+                  <td class="status-failed">${failed}</td>
+                  <td class="status-pending">${pending}</td>
+                  <td>${suitePassRate}%</td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+
+        <div class="footer">
+          <p>Generated by Q-Force Test Platform | ${new Date().toLocaleDateString()}</p>
+        </div>
+
+        <div class="no-print" style="margin-top: 30px; text-align: center;">
+          <button onclick="window.print()" style="padding: 10px 20px; background: #2196f3; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">
+            Print / Save as PDF
+          </button>
+          <button onclick="window.close()" style="padding: 10px 20px; background: #666; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-left: 10px;">
+            Close
+          </button>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+    }
+    handleDownloadClose();
   };
 
   if (loading) {
@@ -157,9 +368,61 @@ const Reports: React.FC = () => {
 
   return (
     <Box>
-      <Typography variant="h4" sx={{ mb: 3, fontWeight: 'bold' }}>
-        Reports & Analytics
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+          Reports & Analytics
+        </Typography>
+        
+        {/* Download Button */}
+        <Button
+          variant="contained"
+          startIcon={<DownloadIcon />}
+          endIcon={<ArrowDropDownIcon />}
+          onClick={handleDownloadClick}
+          sx={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            '&:hover': {
+              background: 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)',
+            },
+          }}
+        >
+          Download Report
+        </Button>
+        
+        {/* Download Menu */}
+        <Menu
+          anchorEl={downloadAnchorEl}
+          open={downloadMenuOpen}
+          onClose={handleDownloadClose}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+        >
+          <MenuItem onClick={downloadJSON}>
+            <ListItemIcon>
+              <DescriptionIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Download as JSON</ListItemText>
+          </MenuItem>
+          <MenuItem onClick={downloadCSV}>
+            <ListItemIcon>
+              <TableChartIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Download as CSV</ListItemText>
+          </MenuItem>
+          <MenuItem onClick={downloadPDF}>
+            <ListItemIcon>
+              <PictureAsPdfIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Download as PDF</ListItemText>
+          </MenuItem>
+        </Menu>
+      </Box>
 
       {/* Summary Cards */}
       <Grid container spacing={3} sx={{ mb: 3 }}>

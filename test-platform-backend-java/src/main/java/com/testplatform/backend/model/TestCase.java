@@ -3,8 +3,8 @@ package com.testplatform.backend.model;
 import com.testplatform.backend.enums.TestType;
 import com.testplatform.backend.enums.TestStatus;
 import com.testplatform.backend.enums.TestPriority;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 

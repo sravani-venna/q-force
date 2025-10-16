@@ -38,18 +38,18 @@ app:
   llm:
     provider: local  # openai, anthropic, or local
     api-key: ${LLM_API_KEY:local-model}
-    model: ${LLM_MODEL:codegemma:7b}  # Local model name (adjust based on your setup)
+    model: ${LLM_MODEL:llama3.2:3b}  # Local model name (using installed llama3.2:3b)
     base-url: ${LLM_BASE_URL:http://localhost:11434}  # Ollama default port
     max-tokens: 8000
     temperature: 0.2
     timeout: 60000
   github:
-    token: ${GITHUB_TOKEN:your-github-token}
+    token: ${GITHUB_TOKEN:}
   reviewer:
     auto-inline-comment: true
   git:
     enabled: true
-    repository-path: ${GIT_REPO_PATH:/Users/dnalla/Documents/APP-KEPLER/kepler-app}
+    repository-path: ${GIT_REPO_PATH:/Users/smamidala/Desktop/kepler-app}
   multi-repo:
     enabled: true
     default-repository: ${DEFAULT_REPO:kepler-app}
@@ -60,7 +60,7 @@ app:
       - id: kepler-app
         name: "Kepler App"
         remote-url: git@github.com:Appen-International/kepler-app.git
-        path: /Users/dnalla/Documents/APP-KEPLER/kepler-app
+        path: /Users/smamidala/Desktop/kepler-app
         branch: release
         language: java
         framework: spring-boot

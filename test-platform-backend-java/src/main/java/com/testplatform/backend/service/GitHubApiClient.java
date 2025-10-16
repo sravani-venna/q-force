@@ -6,6 +6,7 @@ import com.testplatform.backend.config.AppProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -23,6 +24,9 @@ public class GitHubApiClient {
     
     private static final Logger logger = LoggerFactory.getLogger(GitHubApiClient.class);
     
+    @Value("${app.github.token:}")
+    private String githubToken;
+    
     @Autowired
     private RestTemplate restTemplate;
     
@@ -34,6 +38,17 @@ public class GitHubApiClient {
     
     private static final String GITHUB_API_BASE = "https://api.github.com";
     
+    @jakarta.annotation.PostConstruct
+    public void init() {
+        logger.info("=== GitHubApiClient Initialized ===");
+        logger.info("Token from @Value: {}", githubToken != null && !githubToken.isEmpty() ? 
+                    "Configured (" + githubToken.length() + " chars)" : "NOT CONFIGURED");
+        if (githubToken != null && !githubToken.isEmpty()) {
+            logger.info("Token prefix: {}...", githubToken.substring(0, Math.min(10, githubToken.length())));
+        }
+        logger.info("===================================");
+    }
+    
     /**
      * Fetch PR diff files from GitHub
      */
@@ -43,6 +58,10 @@ public class GitHubApiClient {
                 GITHUB_API_BASE, repoOwner, repoName, prNumber);
             
             HttpHeaders headers = createGitHubHeaders();
+            logger.info("📤 Fetching PR files from: {}", url);
+            logger.info("📤 Authorization header: {}", headers.getFirst("Authorization") != null ? 
+                       "Present (length: " + headers.getFirst("Authorization").length() + ")" : "MISSING!");
+            
             HttpEntity<String> entity = new HttpEntity<>(headers);
             
             ResponseEntity<String> response = restTemplate.exchange(
@@ -143,7 +162,17 @@ public class GitHubApiClient {
     
     private HttpHeaders createGitHubHeaders() {
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "token " + appProperties.getGithub().getToken());
+        
+        // Use the @Value injected token
+        String token = githubToken;
+        
+        if (token != null && !token.isEmpty()) {
+            logger.debug("✅ Using GitHub token (length: {})", token.length());
+            headers.set("Authorization", "token " + token);
+        } else {
+            logger.error("❌ GitHub token is missing!");
+        }
+        
         headers.set("Accept", "application/vnd.github.v3+json");
         headers.set("User-Agent", "TestPlatform-Backend");
         return headers;

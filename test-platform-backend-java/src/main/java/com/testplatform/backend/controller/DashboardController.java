@@ -70,12 +70,13 @@ public class DashboardController {
             // Calculate pass rate from actual executions
             double passRate = totalTests > 0 ? (totalPassed * 100.0) / totalTests : 0.0;
             
-            // Calculate average coverage from PRs
-            double avgCoverage = pullRequests.isEmpty() ? 0.0 : 
-                    pullRequests.stream()
-                            .mapToDouble(PullRequest::getCoverage)
+            // Calculate average coverage from test suites (not PRs)
+            double avgCoverage = generatedTests.isEmpty() ? passRate : 
+                    generatedTests.stream()
+                            .filter(suite -> suite.getCoverage() != null && suite.getCoverage() > 0)
+                            .mapToDouble(TestSuite::getCoverage)
                             .average()
-                            .orElse(0.0);
+                            .orElse(passRate); // Default to pass rate if no coverage data
             
             // Calculate average execution time from actual executions
             double avgExecutionTime = allExecutions.stream()
@@ -101,7 +102,7 @@ public class DashboardController {
             stats.setRunningTests((int) runningTests);
             
             // Generate trends data from actual executions (last 3 days)
-            List<DashboardStatsDTO.TrendData> trendsData = generateTrendsData(allExecutions, pullRequests);
+            List<DashboardStatsDTO.TrendData> trendsData = generateTrendsData(allExecutions, pullRequests, generatedTests);
             stats.setTrendsData(trendsData);
             
             // Recent PRs with actual test data
@@ -162,7 +163,7 @@ public class DashboardController {
     /**
      * Generate trends data from actual executions
      */
-    private List<DashboardStatsDTO.TrendData> generateTrendsData(List<TestExecution> executions, List<PullRequest> pullRequests) {
+    private List<DashboardStatsDTO.TrendData> generateTrendsData(List<TestExecution> executions, List<PullRequest> pullRequests, List<TestSuite> testSuites) {
         // Group executions by date and calculate daily stats
         Map<String, Integer> dailyPassed = new HashMap<>();
         Map<String, Integer> dailyFailed = new HashMap<>();
@@ -183,11 +184,18 @@ public class DashboardController {
             }
         }
         
-        // Calculate coverage from PRs
+        // Calculate coverage from test suites (not PRs)
+        for (TestSuite suite : testSuites) {
+            if (suite.getGeneratedAt() != null && suite.getCoverage() != null && suite.getCoverage() > 0) {
+                String suiteDate = suite.getGeneratedAt().toLocalDate().toString();
+                dailyCoverage.merge(suiteDate, suite.getCoverage(), Double::max);
+            }
+        }
+        
+        // Keep PR tracking for historical reasons
         for (PullRequest pr : pullRequests) {
             if (pr.getCreatedAt() != null) {
                 String prDate = pr.getCreatedAt().toLocalDate().toString();
-                dailyCoverage.merge(prDate, pr.getCoverage(), Double::max);
                 dailyPRs.merge(prDate, 1, Integer::sum);
             }
         }

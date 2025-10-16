@@ -2,8 +2,8 @@ package com.testplatform.backend.model;
 
 import com.testplatform.backend.enums.TestType;
 import com.testplatform.backend.enums.TestStatus;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,6 +32,7 @@ public class TestSuite {
     private LocalDateTime generatedAt;
     private LocalDateTime updatedAt;
     private LocalDateTime lastRun;
+    private Double coverage;
     
     // Constructors
     public TestSuite() {
@@ -82,4 +83,7 @@ public class TestSuite {
     
     public LocalDateTime getLastRun() { return lastRun; }
     public void setLastRun(LocalDateTime lastRun) { this.lastRun = lastRun; }
+    
+    public Double getCoverage() { return coverage; }
+    public void setCoverage(Double coverage) { this.coverage = coverage; }
 }

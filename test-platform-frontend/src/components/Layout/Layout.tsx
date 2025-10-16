@@ -23,7 +23,6 @@ import {
   Menu as MenuIcon,
   Dashboard as DashboardIcon,
   Code as CodeIcon,
-  PlayArrow as PlayArrowIcon,
   Assessment as AssessmentIcon,
   Settings as SettingsIcon,
   Notifications as NotificationsIcon,
@@ -53,12 +52,6 @@ const navigationItems: NavigationItem[] = [
     icon: <CodeIcon />,
     path: '/test-generation',
     permission: 'CREATE_TESTS',
-  },
-  {
-    text: 'Test Execution',
-    icon: <PlayArrowIcon />,
-    path: '/test-execution',
-    permission: 'EXECUTE_TESTS',
   },
   {
     text: 'AI PR Review',

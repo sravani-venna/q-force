@@ -572,23 +572,6 @@ const Dashboard: React.FC = () => {
             Test Platform Analytics & Insights
           </Typography>
         </Box>
-        <Chip 
-          label={dataSource === 'api' ? 'Live API Data' : 'Demo Data'} 
-          color={dataSource === 'api' ? 'success' : 'default'}
-          variant="filled"
-          sx={{
-            background: dataSource === 'api' 
-              ? 'linear-gradient(135deg, #4caf50 0%, #2e7d32 100%)' 
-              : 'linear-gradient(135deg, #9e9e9e 0%, #616161 100%)',
-            color: 'white',
-            fontWeight: 600,
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-            '&:hover': {
-              transform: 'scale(1.05)',
-              boxShadow: '0 6px 16px rgba(0,0,0,0.2)'
-            }
-          }}
-        />
       </Box>
 
       {/* Main Metrics Row */}

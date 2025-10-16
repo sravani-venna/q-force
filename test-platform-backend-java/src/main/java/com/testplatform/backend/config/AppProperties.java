@@ -1,6 +1,7 @@
 package com.testplatform.backend.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
@@ -10,12 +11,26 @@ import java.util.List;
 public class AppProperties {
     private String apiPrefix = "/api";
     private List<String> allowedOrigins;
+    
+    @NestedConfigurationProperty
     private Jwt jwt = new Jwt();
+    
+    @NestedConfigurationProperty
     private RateLimit rateLimit = new RateLimit();
+    
+    @NestedConfigurationProperty
     private TestGeneration testGeneration = new TestGeneration();
+    
+    @NestedConfigurationProperty
     private Llm llm = new Llm();
+    
+    @NestedConfigurationProperty
     private Github github = new Github();
+    
+    @NestedConfigurationProperty
     private Reviewer reviewer = new Reviewer();
+    
+    @NestedConfigurationProperty
     private MockData mockData = new MockData();
     
     // Inner classes for nested properties
@@ -96,7 +111,7 @@ public class AppProperties {
     }
     
     public static class Github {
-        private String token = "${GITHUB_TOKEN:your-github-token}";
+        private String token;
         
         public String getToken() { return token; }
         public void setToken(String token) { this.token = token; }
