@@ -30,8 +30,13 @@ import {
   Zoom,
   Skeleton,
   LinearProgress,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
 import { dashboardService, testSuiteService, testExecutionService } from '../../services/apiService';
+import { useRepository } from '../../contexts/RepositoryContext';
 import {
   LineChart,
   Line,
@@ -176,10 +181,12 @@ const StatCard: React.FC<{
 );
 
 const Dashboard: React.FC = () => {
+  const { repositories, selectedRepository, setSelectedRepository } = useRepository();
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [testSuites, setTestSuites] = useState<any[]>([]);
   const [serviceTests, setServiceTests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dataSource, setDataSource] = useState<'api' | 'fallback'>('api');
   const [testDetailsOpen, setTestDetailsOpen] = useState(false);
@@ -296,16 +303,24 @@ const Dashboard: React.FC = () => {
     }));
   };
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = async (isRefresh = false) => {
     try {
-      setLoading(true);
-      console.log('🚀 Fetching dashboard data...');
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+      console.log('🚀 Fetching dashboard data for repository:', selectedRepository);
       console.log('🔑 Token in localStorage:', !!localStorage.getItem('token'));
       
       // Test direct API call first
       try {
+        const statsUrl = selectedRepository 
+          ? `http://localhost:8080/api/dashboard/stats?repository=${selectedRepository}`
+          : 'http://localhost:8080/api/dashboard/stats';
+        
         const [directStatsResponse, directSuitesResponse] = await Promise.all([
-          fetch('http://localhost:8080/api/dashboard/stats'),
+          fetch(statsUrl),
           fetch('http://localhost:8080/api/test-suites')
         ]);
         
@@ -337,9 +352,9 @@ const Dashboard: React.FC = () => {
       
       // Fetch dashboard stats, test suites, service-level tests, and real test cases in parallel
       const [statsResponse, suitesResponse, servicesResponse, realTestCasesResponse] = await Promise.all([
-        dashboardService.getStats(),
-        testSuiteService.getAll(),
-        testSuiteService.getServiceLevelTests(),
+        dashboardService.getStats(selectedRepository || undefined),
+        testSuiteService.getAll(selectedRepository || undefined),
+        testSuiteService.getServiceLevelTests(selectedRepository || undefined),
         dashboardService.getRealTestCases()
       ]);
 
@@ -390,6 +405,7 @@ const Dashboard: React.FC = () => {
       setError('Failed to load dashboard data');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -400,8 +416,15 @@ const Dashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
+    if (selectedRepository) {
+      console.log('🔄 Repository changed to:', selectedRepository);
+      console.log('📡 Fetching data for new repository...');
+      // If we already have data, this is a refresh
+      const isRefresh = dashboardData !== null;
+      fetchDashboardData(isRefresh);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedRepository]);
 
   if (loading) {
     return (
@@ -520,9 +543,9 @@ const Dashboard: React.FC = () => {
     try {
       setLoadingTestCases(true);
       setTestCaseStatus(status);
-      console.log('🔍 Fetching detailed test cases for status:', status);
+      console.log('🔍 Fetching detailed test cases for status:', status, 'repository:', selectedRepository);
       
-      const response = await testExecutionService.getDetailedTestCaseResults(status);
+      const response = await testExecutionService.getDetailedTestCaseResults(status, selectedRepository || undefined);
       console.log('📊 Detailed test cases response:', response);
       
       if (response && response.success) {
@@ -546,9 +569,36 @@ const Dashboard: React.FC = () => {
     <Box 
       sx={{ 
         p: 3,
-        minHeight: '100vh'
+        minHeight: '100vh',
+        position: 'relative'
       }}
     >
+      {/* Refreshing Overlay */}
+      {refreshing && (
+        <Box
+          sx={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+            backdropFilter: 'blur(4px)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            gap: 2
+          }}
+        >
+          <CircularProgress size={60} />
+          <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main' }}>
+            Loading {repositories.find(r => r.id === selectedRepository)?.name || 'repository'}...
+          </Typography>
+        </Box>
+      )}
+      
       {/* Header */}
       <Box 
         sx={{ 
@@ -572,16 +622,80 @@ const Dashboard: React.FC = () => {
           >
             Dashboard
           </Typography>
-          <Typography 
-            variant="body1" 
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Typography 
+              variant="body1" 
+              sx={{ 
+                color: 'text.secondary',
+                fontWeight: 500
+              }}
+            >
+              Test Platform Analytics & Insights
+            </Typography>
+            {selectedRepository && (
+              <Chip
+                icon={<CodeIcon />}
+                label={repositories.find(r => r.id === selectedRepository)?.name || selectedRepository.toUpperCase()}
+                color="primary"
+                variant="outlined"
+                size="small"
+                sx={{
+                  fontWeight: 600,
+                  fontSize: '0.75rem'
+                }}
+              />
+            )}
+          </Box>
+        </Box>
+        
+        {/* Repository Selector */}
+        {repositories.length > 0 && (
+          <FormControl 
             sx={{ 
-              color: 'text.secondary',
-              fontWeight: 500
+              minWidth: 250,
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                background: 'rgba(255, 255, 255, 0.9)',
+                backdropFilter: 'blur(10px)',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                },
+                '&.Mui-focused': {
+                  boxShadow: '0 4px 20px rgba(25, 118, 210, 0.2)',
+                }
+              }
             }}
           >
-            Test Platform Analytics & Insights
-          </Typography>
-        </Box>
+            <InputLabel id="repository-select-label">Repository</InputLabel>
+            <Select
+              labelId="repository-select-label"
+              id="repository-select"
+              value={selectedRepository}
+              label="Repository"
+              onChange={(e) => setSelectedRepository(e.target.value)}
+              sx={{
+                fontWeight: 600,
+                '& .MuiSelect-select': {
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1
+                }
+              }}
+            >
+              {repositories.map((repo) => (
+                <MenuItem key={repo.id} value={repo.id}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CodeIcon sx={{ color: 'primary.main', fontSize: 20 }} />
+                    <Typography variant="body2" fontWeight={600}>
+                      {repo.name}
+                    </Typography>
+                  </Box>
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )}
       </Box>
 
       {/* Main Metrics Row */}

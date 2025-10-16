@@ -17,6 +17,8 @@ import java.util.Map;
 @RestController
 public class HealthController {
     
+    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(HealthController.class);
+    
     @Autowired
     private AppProperties appProperties;
     
@@ -65,13 +67,20 @@ public class HealthController {
      * GET /api/test-suites - Compatibility route for frontend
      */
     @GetMapping("/api/test-suites")
-    public ResponseEntity<ApiResponse<List<com.testplatform.backend.dto.TestSuiteDTO>>> getTestSuites() {
+    public ResponseEntity<ApiResponse<List<com.testplatform.backend.dto.TestSuiteDTO>>> getTestSuites(
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String repository) {
         // Forward to the test generation service to get all tests for compatibility
         try {
-            List<com.testplatform.backend.model.TestSuite> tests = testGenerationService.getAllTests();
+            List<com.testplatform.backend.model.TestSuite> tests = repository != null 
+                ? testGenerationService.getAllTests(repository)
+                : testGenerationService.getAllTests();
+            
             List<com.testplatform.backend.dto.TestSuiteDTO> testDTOs = tests.stream()
                     .map(com.testplatform.backend.dto.TestSuiteDTO::new)
                     .collect(java.util.stream.Collectors.toList());
+            
+            logger.info("📊 Returning tests for {}: {} test suites", 
+                       repository != null ? repository : "default", testDTOs.size());
             
             return ResponseEntity.ok(ApiResponse.success(testDTOs, testDTOs.size()));
         } catch (Exception error) {

@@ -49,14 +49,24 @@ app:
     auto-inline-comment: true
   git:
     enabled: true
-    repository-path: ${GIT_REPO_PATH:/Users/smamidala/Desktop/kepler-app}
+    repository-path: ${GIT_REPO_PATH:/Users/smamidala/Desktop/shared-serherevices}
   multi-repo:
     enabled: true
-    default-repository: ${DEFAULT_REPO:kepler-app}
+    default-repository: ${DEFAULT_REPO:shared-services}
     auto-detect-language: true
     auto-detect-framework: true
     repositories:
-      # Kepler App - Local Repository with Git Remote
+      # Shared Services - Primary Repository
+      - id: shared-services
+        name: "Shared Services"
+        remote-url: git@github.com:Appen-International/shared-services.git
+        path: /Users/smamidala/Desktop/shared-services
+        branch: main
+        language: java
+        framework: spring-boot
+        enabled: true
+      
+      # Kepler App - Secondary Repository
       - id: kepler-app
         name: "Kepler App"
         remote-url: git@github.com:Appen-International/kepler-app.git
@@ -65,15 +75,6 @@ app:
         language: java
         framework: spring-boot
         enabled: true
-      
-      # Local Repository Backup (disabled)
-      # - id: cdac-local
-      #   name: "CDAC Project Local"
-      #   path: ${GIT_REPO_PATH:/Users/vnannuri/Desktop/test}
-      #   branch: cdac-main
-      #   language: java
-      #   framework: spring-boot
-      #   enabled: false
       
       # Remote Repository Example - Public GitHub Repository
       # - id: github-public-repo

@@ -44,8 +44,10 @@ public class TestController {
      * GET /api/tests/services - Get tests aggregated by service
      */
     @GetMapping("/services")
-    public ResponseEntity<ApiResponse<List<com.testplatform.backend.dto.ServiceTestSummaryDTO>>> getTestsByService() {
-        List<com.testplatform.backend.dto.ServiceTestSummaryDTO> services = 
+    public ResponseEntity<ApiResponse<List<com.testplatform.backend.dto.ServiceTestSummaryDTO>>> getTestsByService(
+            @RequestParam(value = "repository", required = false) String repository) {
+        List<com.testplatform.backend.dto.ServiceTestSummaryDTO> services = repository != null ? 
+            testGenerationService.getTestsByService(repository) :
             testGenerationService.getTestsByService();
         
         return ResponseEntity.ok(ApiResponse.success(

@@ -39,9 +39,10 @@ public class TestExecutionController {
      */
     @GetMapping("/test-cases")
     public ResponseEntity<ApiResponse<List<DetailedTestCaseDTO>>> getDetailedTestCaseResults(
-            @RequestParam(required = false) String status) {
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String repository) {
         try {
-            List<DetailedTestCaseDTO> results = testExecutionService.getDetailedTestCaseResults(status);
+            List<DetailedTestCaseDTO> results = testExecutionService.getDetailedTestCaseResults(status, repository);
             return ResponseEntity.ok(ApiResponse.success(results, results.size()));
         } catch (Exception e) {
             return ResponseEntity.status(500)

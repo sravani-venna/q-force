@@ -40,9 +40,19 @@ apiClient.interceptors.response.use(
 
 // Dashboard API
 export const dashboardService = {
-  async getStats() {
+  async getRepositories() {
     try {
-      const response = await apiClient.get('/dashboard/stats');
+      const response = await apiClient.get('/dashboard/repositories');
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Failed to fetch repositories');
+    }
+  },
+  
+  async getStats(repositoryId?: string) {
+    try {
+      const params = repositoryId ? { repository: repositoryId } : {};
+      const response = await apiClient.get('/dashboard/stats', { params });
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Failed to fetch dashboard stats');
@@ -61,9 +71,10 @@ export const dashboardService = {
 
 // Test Suites API
 export const testSuiteService = {
-  async getAll() {
+  async getAll(repositoryId?: string) {
     try {
-      const response = await apiClient.get('/test-suites');
+      const params = repositoryId ? { repository: repositoryId } : {};
+      const response = await apiClient.get('/test-suites', { params });
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Failed to fetch test suites');
@@ -106,9 +117,10 @@ export const testSuiteService = {
     }
   },
 
-  async getServiceLevelTests() {
+  async getServiceLevelTests(repositoryId?: string) {
     try {
-      const response = await apiClient.get('/tests/services');
+      const params = repositoryId ? { repository: repositoryId } : {};
+      const response = await apiClient.get('/tests/services', { params });
       return response.data;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Failed to fetch service-level tests');
@@ -157,9 +169,18 @@ export const testExecutionService = {
     }
   },
 
-  async getDetailedTestCaseResults(status?: string) {
+  async getDetailedTestCaseResults(status?: string, repositoryId?: string) {
     try {
-      const url = status ? `/test-executions/test-cases?status=${status}` : '/test-executions/test-cases';
+      let url = '/test-executions/test-cases';
+      const params: string[] = [];
+      
+      if (status) params.push(`status=${status}`);
+      if (repositoryId) params.push(`repository=${repositoryId}`);
+      
+      if (params.length > 0) {
+        url += '?' + params.join('&');
+      }
+      
       const response = await apiClient.get(url);
       return response.data;
     } catch (error: any) {

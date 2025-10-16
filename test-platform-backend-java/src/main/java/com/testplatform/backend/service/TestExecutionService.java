@@ -364,14 +364,16 @@ public class TestExecutionService {
     }
 
     /**
-     * Get detailed test case results by status
+     * Get detailed test case results by status and repository
      */
-    public List<DetailedTestCaseDTO> getDetailedTestCaseResults(String status) {
+    public List<DetailedTestCaseDTO> getDetailedTestCaseResults(String status, String repository) {
         List<DetailedTestCaseDTO> results = new ArrayList<>();
         
         try {
-            // Get all test suites
-            List<TestSuite> allTestSuites = testGenerationService.getAllTests();
+            // Get all test suites for the specified repository
+            List<TestSuite> allTestSuites = repository != null ? 
+                    testGenerationService.getAllTests(repository) : 
+                    testGenerationService.getAllTests();
             
             for (TestSuite suite : allTestSuites) {
                 if (suite.getTestCases() != null) {
@@ -410,7 +412,8 @@ public class TestExecutionService {
                 return b.getExecutedAt().compareTo(a.getExecutedAt());
             });
             
-            logger.info("📊 Retrieved {} detailed test case results for status: {}", results.size(), status);
+            logger.info("📊 Retrieved {} detailed test case results for status: {}, repository: {}", 
+                       results.size(), status, repository != null ? repository : "default");
             
         } catch (Exception e) {
             logger.error("❌ Error retrieving detailed test case results: {}", e.getMessage());
@@ -426,7 +429,7 @@ public class TestExecutionService {
         Map<String, Object> summary = new HashMap<>();
         
         try {
-            List<DetailedTestCaseDTO> allResults = getDetailedTestCaseResults(null);
+            List<DetailedTestCaseDTO> allResults = getDetailedTestCaseResults(null, null);
             
             long totalTests = allResults.size();
             long passedTests = allResults.stream()

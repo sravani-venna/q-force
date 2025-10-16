@@ -19,6 +19,7 @@ import Register from './pages/Auth/Register';
 // Contexts
 import { AuthProvider } from './contexts/AuthContext';
 import { useAuth } from './contexts/AuthContext';
+import { RepositoryProvider } from './contexts/RepositoryContext';
 
 // Create Material-UI theme
 const theme = createTheme({
@@ -152,21 +153,23 @@ const App: React.FC = () => {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <AuthProvider>
-          <Router>
-            <AppRoutes />
-            <ToastContainer
-              position="top-right"
-              autoClose={5000}
-              hideProgressBar={false}
-              newestOnTop={false}
-              closeOnClick
-              rtl={false}
-              pauseOnFocusLoss
-              draggable
-              pauseOnHover
-              theme="light"
-            />
-          </Router>
+          <RepositoryProvider>
+            <Router>
+              <AppRoutes />
+              <ToastContainer
+                position="top-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+              />
+            </Router>
+          </RepositoryProvider>
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>

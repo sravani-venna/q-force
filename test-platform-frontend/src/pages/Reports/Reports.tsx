@@ -43,8 +43,10 @@ import {
   TableChart as TableChartIcon,
   PictureAsPdf as PictureAsPdfIcon,
 } from '@mui/icons-material';
+import { useRepository } from '../../contexts/RepositoryContext';
 
 const Reports: React.FC = () => {
+  const { selectedRepository } = useRepository();
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [testSuites, setTestSuites] = useState<any[]>([]);
@@ -53,15 +55,26 @@ const Reports: React.FC = () => {
   const downloadMenuOpen = Boolean(downloadAnchorEl);
 
   useEffect(() => {
-    fetchReportsData();
-  }, []);
+    if (selectedRepository) {
+      fetchReportsData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedRepository]);
 
   const fetchReportsData = async () => {
     try {
+      const statsUrl = selectedRepository 
+        ? `http://localhost:8080/api/dashboard/stats?repository=${selectedRepository}`
+        : 'http://localhost:8080/api/dashboard/stats';
+      
+      const servicesUrl = selectedRepository
+        ? `http://localhost:8080/api/tests/services?repository=${selectedRepository}`
+        : 'http://localhost:8080/api/tests/services';
+      
       const [statsRes, suitesRes, servicesRes] = await Promise.all([
-        fetch('http://localhost:8080/api/dashboard/stats'),
+        fetch(statsUrl),
         fetch('http://localhost:8080/api/test-suites'),
-        fetch('http://localhost:8080/api/tests/services'),
+        fetch(servicesUrl),
       ]);
 
       const statsData = await statsRes.json();
