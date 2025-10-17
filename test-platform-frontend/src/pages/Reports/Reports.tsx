@@ -348,7 +348,7 @@ const Reports: React.FC = () => {
 
   // Test suite distribution for pie chart - Use service-level data
   const suiteDistribution = (() => {
-    const colors = ['#2196f3', '#4caf50', '#ff9800', '#f44336', '#9c27b0', '#00bcd4', '#8bc34a'];
+    const colors = ['#4caf50', '#2196f3', '#ff9800', '#9c27b0', '#f44336', '#00bcd4', '#8bc34a'];
     return (serviceTests || [])
       .map((service: any, index: number) => ({
         name: service.serviceName,

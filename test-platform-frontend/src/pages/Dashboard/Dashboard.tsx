@@ -883,7 +883,7 @@ const Dashboard: React.FC = () => {
                       cy="50%"
                       labelLine={true}
                       label={(entry: any) => `${entry.shortName}: ${entry.value}`}
-                      outerRadius={85}
+                      outerRadius={80}
                       fill="#8884d8"
                       dataKey="value"
                     >
