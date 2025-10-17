@@ -193,18 +193,21 @@ public class DashboardController {
         String yesterday = java.time.LocalDate.now().minusDays(1).toString();
         String dayBefore = java.time.LocalDate.now().minusDays(2).toString();
         
-        // If we have actual test executions, use them
+        // Try to use actual test executions first
+        boolean hasValidExecutions = false;
         if (!executions.isEmpty()) {
             for (TestExecution exec : executions) {
                 if (exec.getResults() != null && exec.getStartTime() != null) {
                     String execDate = exec.getStartTime().toLocalDate().toString();
                     dailyPassed.merge(execDate, exec.getResults().getPassed(), Integer::sum);
                     dailyFailed.merge(execDate, exec.getResults().getFailed(), Integer::sum);
+                    hasValidExecutions = true;
                 }
             }
-        } 
-        // Otherwise, generate trends from test suite data
-        else if (!testSuites.isEmpty()) {
+        }
+        
+        // If no valid executions, generate trends from test suite data
+        if (!hasValidExecutions && !testSuites.isEmpty()) {
             // Calculate total passed/failed from test suites
             int totalPassed = testSuites.stream()
                 .filter(suite -> suite.getTestCases() != null)
