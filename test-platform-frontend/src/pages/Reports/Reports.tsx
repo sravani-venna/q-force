@@ -67,13 +67,17 @@ const Reports: React.FC = () => {
         ? `http://localhost:8080/api/dashboard/stats?repository=${selectedRepository}`
         : 'http://localhost:8080/api/dashboard/stats';
       
+      const suitesUrl = selectedRepository
+        ? `http://localhost:8080/api/test-suites?repository=${selectedRepository}`
+        : 'http://localhost:8080/api/test-suites';
+      
       const servicesUrl = selectedRepository
         ? `http://localhost:8080/api/tests/services?repository=${selectedRepository}`
         : 'http://localhost:8080/api/tests/services';
       
       const [statsRes, suitesRes, servicesRes] = await Promise.all([
         fetch(statsUrl),
-        fetch('http://localhost:8080/api/test-suites'),
+        fetch(suitesUrl),
         fetch(servicesUrl),
       ]);
 
@@ -107,6 +111,7 @@ const Reports: React.FC = () => {
 
   const downloadJSON = () => {
     const reportData = {
+      repository: selectedRepository || 'unknown',
       timestamp: new Date().toISOString(),
       summary: {
         totalTests: dashboardData?.totalTests || 0,
@@ -133,7 +138,8 @@ const Reports: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `test-report-${new Date().toISOString().split('T')[0]}.json`;
+    const repoName = selectedRepository || 'unknown';
+    link.download = `test-report-${repoName}-${new Date().toISOString().split('T')[0]}.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -146,8 +152,11 @@ const Reports: React.FC = () => {
     const passedTests = dashboardData?.passedTests || 0;
     const failedTests = dashboardData?.failedTests || 0;
     const passRate = ((passedTests / (totalTests || 1)) * 100).toFixed(1);
+    const repoName = selectedRepository || 'unknown';
 
     let csvContent = 'Test Report\n\n';
+    csvContent += `Repository,${repoName}\n`;
+    csvContent += `Generated,${new Date().toISOString()}\n\n`;
     csvContent += 'Summary\n';
     csvContent += 'Metric,Value\n';
     csvContent += `Total Tests,${totalTests}\n`;
@@ -171,7 +180,7 @@ const Reports: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `test-report-${new Date().toISOString().split('T')[0]}.csv`;
+    link.download = `test-report-${repoName}-${new Date().toISOString().split('T')[0]}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -185,12 +194,13 @@ const Reports: React.FC = () => {
     const passedTests = dashboardData?.passedTests || 0;
     const failedTests = dashboardData?.failedTests || 0;
     const passRate = ((passedTests / (totalTests || 1)) * 100).toFixed(1);
+    const repoName = selectedRepository || 'unknown';
 
     const htmlContent = `
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Test Report - ${new Date().toLocaleDateString()}</title>
+        <title>Test Report - ${repoName} - ${new Date().toLocaleDateString()}</title>
         <style>
           body { font-family: Arial, sans-serif; margin: 40px; color: #333; }
           h1 { color: #2196f3; border-bottom: 3px solid #2196f3; padding-bottom: 10px; }
@@ -215,6 +225,7 @@ const Reports: React.FC = () => {
       </head>
       <body>
         <h1>🧪 Test Execution Report</h1>
+        <p><strong>Repository:</strong> ${repoName}</p>
         <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
         
         <h2>📊 Summary</h2>

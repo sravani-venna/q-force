@@ -52,7 +52,7 @@ const navigationItems: NavigationItem[] = [
     permission: 'CREATE_TESTS',
   },
   {
-    text: 'AI PR Review',
+    text: 'AI Review',
     icon: <SmartToyIcon />,
     path: '/ai-review',
   },

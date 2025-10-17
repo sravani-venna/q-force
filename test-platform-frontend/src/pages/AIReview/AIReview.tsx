@@ -227,7 +227,7 @@ const AIReview: React.FC = () => {
       {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Typography variant="h4" gutterBottom fontWeight="bold">
-          AI PR Review
+          AI Review
         </Typography>
         <Typography variant="body1" color="text.secondary">
           Get AI-powered code review suggestions for your GitHub pull requests using local CodeGemma
