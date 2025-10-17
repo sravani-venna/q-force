@@ -142,7 +142,7 @@ public class TestGenerationService {
         
         // For Kepler App - focus on specific services
         if ("kepler-app".equals(repositoryId)) {
-            String[] targetServices = {"project-service", "contributor-service", "work-service"};
+            String[] targetServices = {"project-service", "contributor-service", "work-service", "public-api-service"};
             for (String service : targetServices) {
                 java.io.File serviceDir = new java.io.File(dir, service);
                 if (serviceDir.exists() && serviceDir.isDirectory()) {
@@ -251,17 +251,23 @@ public class TestGenerationService {
                 logger.info("📝 Created suite with path (truncated): {}...", relativePath.substring(0, 100));
             }
             
-            // Determine test type
-            if (relativePath.contains("integration") || relativePath.contains("Integration")) {
+            // Determine test type - check both path and filename
+            TestType testType;
+            if (relativePath.contains("integration") || relativePath.contains("Integration") ||
+                fileName.contains("Integration") || fileName.contains("IT")) {
+                testType = TestType.INTEGRATION;
                 suite.setType(TestType.INTEGRATION);
-            } else if (relativePath.contains("e2e") || relativePath.contains("E2E")) {
+            } else if (relativePath.contains("e2e") || relativePath.contains("E2E") ||
+                       fileName.contains("E2E") || fileName.contains("e2e")) {
+                testType = TestType.E2E;
                 suite.setType(TestType.E2E);
             } else {
+                testType = TestType.UNIT;
                 suite.setType(TestType.UNIT);
             }
             
             // Read file and count test methods
-            List<TestCase> testCases = extractTestCasesFromFile(testFile);
+            List<TestCase> testCases = extractTestCasesFromFile(testFile, testType);
             suite.setTestCases(testCases);
             
             // Calculate summary metrics
@@ -302,7 +308,7 @@ public class TestGenerationService {
     /**
      * Extract test cases from test file
      */
-    private List<TestCase> extractTestCasesFromFile(java.io.File testFile) {
+    private List<TestCase> extractTestCasesFromFile(java.io.File testFile, TestType testType) {
         List<TestCase> testCases = new ArrayList<>();
         
         try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(testFile))) {
@@ -318,6 +324,9 @@ public class TestGenerationService {
                             TestCase tc = new TestCase();
                             tc.setId(String.valueOf(nextTestId++));
                             tc.setName(methodName);
+                            
+                            // Set test type from suite
+                            tc.setType(testType);
                             
                             // Randomly assign pass/fail (90% pass rate)
                             boolean isPassed = Math.random() < 0.9;
@@ -894,6 +903,8 @@ public class TestGenerationService {
             return "Contributor Service";
         } else if (filePath.contains("work-service")) {
             return "Work Service";
+        } else if (filePath.contains("public-api-service")) {
+            return "Public API Service";
         } else if (filePath.contains("api-gateway")) {
             return "API Gateway";
         } else if (filePath.contains("batchjob-service")) {
@@ -965,6 +976,10 @@ public class TestGenerationService {
             case "Work Service":
                 summary.setDescription("Manages work items, jobs, prompts, and crowd operations");
                 summary.setRepository("kepler-app/work-service");
+                break;
+            case "Public API Service":
+                summary.setDescription("Provides public REST API endpoints for external integrations");
+                summary.setRepository("kepler-app/public-api-service");
                 break;
             default:
                 summary.setDescription("Kepler App Service");
